@@ -22,12 +22,14 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Input;
+using dnSpy.Contracts.Command;
 using dnSpy.Contracts.Controls;
 using dnSpy.Contracts.Images;
 using dnSpy.Controls;
 
 namespace dnSpy.Tabs {
 	sealed class TabElementZoomer : IDisposable {
+
 		readonly List<CommandBinding> commandBindings;
 		readonly List<KeyBinding> keyBindings;
 		FrameworkElement? zoomElement;
@@ -44,16 +46,28 @@ namespace dnSpy.Tabs {
 			commandBindings.Clear();
 			keyBindings.Clear();
 
-			ICommand cmd;
-			commandBindings.Add(new CommandBinding(cmd = new RoutedCommand("ZoomIncrease", typeof(TabElementZoomer)), (s, e) => ZoomIncrease(), (s, e) => e.CanExecute = true));
-			keyBindings.Add(new KeyBinding(cmd, Key.OemPlus, ModifierKeys.Control));
-			keyBindings.Add(new KeyBinding(cmd, Key.Add, ModifierKeys.Control));
-			commandBindings.Add(new CommandBinding(cmd = new RoutedCommand("ZoomDecrease", typeof(TabElementZoomer)), (s, e) => ZoomDecrease(), (s, e) => e.CanExecute = true));
-			keyBindings.Add(new KeyBinding(cmd, Key.OemMinus, ModifierKeys.Control));
-			keyBindings.Add(new KeyBinding(cmd, Key.Subtract, ModifierKeys.Control));
-			commandBindings.Add(new CommandBinding(cmd = new RoutedCommand("ZoomReset", typeof(TabElementZoomer)), (s, e) => ZoomReset(), (s, e) => e.CanExecute = true));
-			keyBindings.Add(new KeyBinding(cmd, Key.D0, ModifierKeys.Control));
-			keyBindings.Add(new KeyBinding(cmd, Key.NumPad0, ModifierKeys.Control));
+			if (!Commands.CommandService.CommandManager.TryGetKeyInputs(KeyInputGuid, out var keys)) {
+				keys = DefaultKeyInputs;
+				Commands.CommandService.CommandManager.AddKeyInputs(KeyInputGuid, nameof(TabElementZoomer), keys);
+			}
+
+			var name = nameof(ZoomIncrease);
+			var cmd = new RoutedCommand(name, typeof(TabElementZoomer));
+			commandBindings.Add(new CommandBinding(cmd, (s, e) => ZoomIncrease(), (s, e) => e.CanExecute = true));
+			foreach (var input in keys[name])
+				keyBindings.Add(new KeyBinding(cmd, input.Key, input.Modifiers));
+
+			name = nameof(ZoomDecrease);
+			cmd = new RoutedCommand(name, typeof(TabElementZoomer));
+			commandBindings.Add(new CommandBinding(cmd, (s, e) => ZoomDecrease(), (s, e) => e.CanExecute = true));
+			foreach (var input in keys[name])
+				keyBindings.Add(new KeyBinding(cmd, input.Key, input.Modifiers));
+
+			name = nameof(ZoomReset);
+			cmd = new RoutedCommand(name, typeof(TabElementZoomer));
+			commandBindings.Add(new CommandBinding(cmd, (s, e) => ZoomReset(), (s, e) => e.CanExecute = true));
+			foreach (var input in keys[name])
+				keyBindings.Add(new KeyBinding(cmd, input.Key, input.Modifiers));
 		}
 
 		public void InstallZoom(IUIObjectProvider provider, FrameworkElement? elem) {
@@ -190,5 +204,17 @@ namespace dnSpy.Tabs {
 		}
 
 		public void Dispose() => UninstallScale();
+
+		#region Statics
+
+		private static readonly Guid KeyInputGuid = new Guid("abde0231-6128-4282-afa8-858e1127e25e");
+
+		private static IDictionary<string, IList<KeyInput>> DefaultKeyInputs => new Dictionary<string, IList<KeyInput>> {
+			[nameof(ZoomIncrease)] = new[] {KeyInput.Control(Key.OemPlus), KeyInput.Control(Key.Add),},
+			[nameof(ZoomDecrease)] = new[] {KeyInput.Control(Key.OemMinus), KeyInput.Control(Key.Subtract),},
+			[nameof(ZoomReset)] = new[] {KeyInput.Control(Key.D0), KeyInput.Control(Key.NumPad0),},
+		};
+
+		#endregion
 	}
 }
