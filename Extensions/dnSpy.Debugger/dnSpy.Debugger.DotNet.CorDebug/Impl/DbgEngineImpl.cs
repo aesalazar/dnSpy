@@ -20,8 +20,8 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading;
 using dndbg.COM.CorDebug;
@@ -88,6 +88,7 @@ namespace dnSpy.Debugger.DotNet.CorDebug.Impl {
 		readonly List<DbgDotNetValueImpl> dotNetValuesToCloseOnContinue;
 		readonly List<DbgCorValueHolder> valuesToCloseNow;
 		bool isUnhandledException;
+		bool redirectConsoleOutput;
 
 		protected DbgEngineImpl(DbgEngineImplDependencies deps, DbgManager dbgManager, DbgStartKind startKind) {
 			if (deps is null)
@@ -341,9 +342,9 @@ namespace dnSpy.Debugger.DotNet.CorDebug.Impl {
 			hProcess_debuggee?.Close();
 		}
 
-		void DnDebugger_OnAttachComplete(object sender, EventArgs e) => DetectMainThread();
+		void DnDebugger_OnAttachComplete(object? sender, EventArgs e) => DetectMainThread();
 
-		void DnDebugger_OnProcessStateChanged(object sender, DebuggerEventArgs e) {
+		void DnDebugger_OnProcessStateChanged(object? sender, DebuggerEventArgs e) {
 			Debug.Assert(!(sender is null) && sender == dnDebugger);
 
 			if (dnDebugger.ProcessState == DebuggerProcessState.Terminated) {
@@ -418,12 +419,12 @@ namespace dnSpy.Debugger.DotNet.CorDebug.Impl {
 			}
 		}
 
-		void DnDebugger_OnRedirectedOutput(object sender, RedirectedOutputEventArgs e) {
+		void DnDebugger_OnRedirectedOutput(object? sender, RedirectedOutputEventArgs e) {
 			var source = e.IsStandardOutput ? AsyncProgramMessageSource.StandardOutput : AsyncProgramMessageSource.StandardError;
 			SendMessage(new DbgMessageAsyncProgramMessage(source, e.Text));
 		}
 
-		void DnDebugger_OnNameChanged(object sender, NameChangedDebuggerEventArgs e) {
+		void DnDebugger_OnNameChanged(object? sender, NameChangedDebuggerEventArgs e) {
 			TryGetEngineAppDomain(e.AppDomain)?.UpdateName(e.AppDomain?.Name);
 			OnNewThreadName_CorDebug(e.Thread);
 		}
@@ -439,7 +440,7 @@ namespace dnSpy.Debugger.DotNet.CorDebug.Impl {
 			return engineAppDomain;
 		}
 
-		void DnDebugger_OnAppDomainAdded(object sender, AppDomainDebuggerEventArgs e) {
+		void DnDebugger_OnAppDomainAdded(object? sender, AppDomainDebuggerEventArgs e) {
 			Debug.Assert(!(objectFactory is null));
 			if (e.Added) {
 				e.ShouldPause = true;
@@ -503,14 +504,14 @@ namespace dnSpy.Debugger.DotNet.CorDebug.Impl {
 			throw new InvalidOperationException();
 		}
 
-		bool TryGetModuleData(DbgModule module, [NotNullWhenTrue] out DbgModuleData? data) {
+		bool TryGetModuleData(DbgModule module, [NotNullWhen(true)] out DbgModuleData? data) {
 			if (module.TryGetData(out data) && data.Engine == this)
 				return true;
 			data = null;
 			return false;
 		}
 
-		internal bool TryGetDnModuleAndVersion(DbgModule module, [NotNullWhenTrue] out DnModule? dnModule, out int loadClassVersion) {
+		internal bool TryGetDnModuleAndVersion(DbgModule module, [NotNullWhen(true)] out DnModule? dnModule, out int loadClassVersion) {
 			if (module.TryGetData(out DbgModuleData? data) && data.Engine == this) {
 				dnModule = data.DnModule;
 				loadClassVersion = data.LoadClassVersion;
@@ -521,7 +522,7 @@ namespace dnSpy.Debugger.DotNet.CorDebug.Impl {
 			return false;
 		}
 
-		internal bool TryGetDnModule(DbgModule module, [NotNullWhenTrue] out DnModule? dnModule) {
+		internal bool TryGetDnModule(DbgModule module, [NotNullWhen(true)] out DnModule? dnModule) {
 			if (module.TryGetData(out DbgModuleData? data) && data.Engine == this) {
 				dnModule = data.DnModule;
 				return true;
@@ -579,7 +580,7 @@ namespace dnSpy.Debugger.DotNet.CorDebug.Impl {
 			}
 		}
 
-		void DnDebugger_OnModuleAdded(object sender, ModuleDebuggerEventArgs e) {
+		void DnDebugger_OnModuleAdded(object? sender, ModuleDebuggerEventArgs e) {
 			Debug.Assert(!(objectFactory is null));
 			if (e.Added) {
 				e.ShouldPause = true;
@@ -697,9 +698,8 @@ namespace dnSpy.Debugger.DotNet.CorDebug.Impl {
 				if (debuggerSettings.RedirectGuiConsoleOutput && PortableExecutableFileHelpers.IsGuiApp(options.Filename))
 					dbgOptions.RedirectConsoleOutput = true;
 
+				redirectConsoleOutput = dbgOptions.RedirectConsoleOutput;
 				dnDebugger = DnDebugger.DebugProcess(dbgOptions);
-				if (dbgOptions.RedirectConsoleOutput)
-					dnDebugger.OnRedirectedOutput += DnDebugger_OnRedirectedOutput;
 				OnDebugProcess(dnDebugger);
 				HookDnDebuggerEvents();
 				return;
@@ -832,6 +832,8 @@ namespace dnSpy.Debugger.DotNet.CorDebug.Impl {
 			Debug.Assert(Array.IndexOf(objectFactory.Process.Runtimes, runtime) < 0);
 			this.objectFactory = objectFactory;
 			runtime.GetOrCreateData(() => new RuntimeData(this));
+			if (redirectConsoleOutput)
+				CorDebugThread(() => dnDebugger.OnRedirectedOutput += DnDebugger_OnRedirectedOutput);
 		}
 
 		protected override void CloseCore(DbgDispatcher dispatcher) {

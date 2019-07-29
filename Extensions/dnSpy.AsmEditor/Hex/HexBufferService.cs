@@ -56,7 +56,7 @@ namespace dnSpy.AsmEditor.Hex {
 			undoCommandService.OnEvent += UndoCommandService_OnEvent;
 		}
 
-		void UndoCommandService_OnEvent(object sender, UndoCommandServiceEventArgs e) {
+		void UndoCommandService_OnEvent(object? sender, UndoCommandServiceEventArgs e) {
 			var buffer = HexUndoableDocumentsProvider.TryGetHexBuffer(e.UndoObject);
 			if (buffer is null)
 				return;
@@ -69,7 +69,7 @@ namespace dnSpy.AsmEditor.Hex {
 
 		void OnDocumentSaved(HexBuffer buffer) {
 			lock (lockObj) {
-				bool b = filenameToBuffer.TryGetValue(buffer.Name, out object dictObj);
+				bool b = filenameToBuffer.TryGetValue(buffer.Name, out var dictObj);
 				Debug.Assert(b);
 				if (!b)
 					return;
@@ -84,7 +84,7 @@ namespace dnSpy.AsmEditor.Hex {
 
 		void OnDocumentDirty(HexBuffer buffer) {
 			lock (lockObj) {
-				bool b = filenameToBuffer.TryGetValue(buffer.Name, out object dictObj);
+				bool b = filenameToBuffer.TryGetValue(buffer.Name, out var dictObj);
 				Debug.Assert(b);
 				if (!b)
 					return;
@@ -117,7 +117,7 @@ namespace dnSpy.AsmEditor.Hex {
 		}
 
 		HexBuffer? TryGet_NoLock(string filename) {
-			if (!filenameToBuffer.TryGetValue(filename, out object obj))
+			if (!filenameToBuffer.TryGetValue(filename, out var obj))
 				return null;
 			return TryGetBuffer(obj);
 		}

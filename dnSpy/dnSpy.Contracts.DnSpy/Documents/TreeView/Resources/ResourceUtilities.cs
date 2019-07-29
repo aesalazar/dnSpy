@@ -104,7 +104,7 @@ namespace dnSpy.Contracts.Documents.TreeView.Resources {
 				return;
 
 			var mod = (node as DocumentTreeNodeData)?.GetModule();
-			var filename = mod is null ? null : mod.Location;
+			var filename = mod?.Location;
 			output.Write($"0x{fo:X8}", new AddressReference(filename, false, fo, node.Length), DecompilerReferenceFlags.None, BoxedTextColor.Comment);
 			output.Write(": ", BoxedTextColor.Comment);
 		}
@@ -138,7 +138,7 @@ namespace dnSpy.Contracts.Documents.TreeView.Resources {
 				return false;
 
 			stream.Position = 0;
-			FileType type = GuessFileType.DetectFileType(stream);
+			var type = GuessFileType.DetectFileType(stream);
 			if (type == FileType.Binary)
 				return false;
 

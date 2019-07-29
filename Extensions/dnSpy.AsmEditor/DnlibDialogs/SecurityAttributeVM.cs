@@ -87,7 +87,7 @@ namespace dnSpy.AsmEditor.DnlibDialogs {
 			Reinitialize();
 		}
 
-		void Args_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e) {
+		void Args_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e) {
 			Hook(e);
 			OnPropertyChanged(nameof(FullName));
 			HasErrorUpdated();
@@ -95,16 +95,16 @@ namespace dnSpy.AsmEditor.DnlibDialogs {
 
 		void Hook(NotifyCollectionChangedEventArgs e) {
 			if (!(e.OldItems is null)) {
-				foreach (INotifyPropertyChanged i in e.OldItems)
-					i.PropertyChanged -= arg_PropertyChanged;
+				foreach (INotifyPropertyChanged? i in e.OldItems)
+					i!.PropertyChanged -= arg_PropertyChanged;
 			}
 			if (!(e.NewItems is null)) {
-				foreach (INotifyPropertyChanged i in e.NewItems)
-					i.PropertyChanged += arg_PropertyChanged;
+				foreach (INotifyPropertyChanged? i in e.NewItems)
+					i!.PropertyChanged += arg_PropertyChanged;
 			}
 		}
 
-		void arg_PropertyChanged(object sender, PropertyChangedEventArgs e) {
+		void arg_PropertyChanged(object? sender, PropertyChangedEventArgs e) {
 			OnPropertyChanged(nameof(FullName));
 			HasErrorUpdated();
 		}

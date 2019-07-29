@@ -140,7 +140,7 @@ namespace dnSpy.Documents.Tabs.DocViewer {
 		public void AddCustomData<TData>(string id, TData data) {
 			VerifyGeneratingOrPostProcessing();
 			List<TData> list;
-			if (customDataDict.TryGetValue(id, out object listObj))
+			if (customDataDict.TryGetValue(id, out var listObj))
 				list = (List<TData>)listObj;
 			else
 				customDataDict.Add(id, list = new List<TData>());
@@ -202,7 +202,7 @@ namespace dnSpy.Documents.Tabs.DocViewer {
 				AddText(text, index, length, color);
 				return;
 			}
-			Debug.Assert(!reference.GetType().FullName.Contains("ICSharpCode"), "Internal decompiler data shouldn't be passed to Write()-ref");
+			Debug.Assert(!(reference.GetType().FullName ?? string.Empty).Contains("ICSharpCode"), "Internal decompiler data shouldn't be passed to Write()-ref");
 			referenceBuilder.Add(new Span(stringBuilder.Length, length), new ReferenceInfo(reference, flags));
 			AddText(text, index, length, color);
 		}

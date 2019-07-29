@@ -92,14 +92,14 @@ namespace dnSpy.AsmEditor.MethodBody {
 		bool CopyCatchTypeMDTokensCanExecute(ExceptionHandlerVM[] ehs) => ehs.Any(a => !(GetCatchTypeToken(a.CatchType) is null));
 		static uint? GetCatchTypeToken(ITypeDefOrRef? type) => type is null ? (uint?)null : type.MDToken.Raw;
 
-		void coll_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e) {
+		void coll_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e) {
 			if (!(e.NewItems is null))
 				InitializeExceptionHandlers(e.NewItems);
 		}
 
 		void InitializeExceptionHandlers(System.Collections.IList list) {
-			foreach (ExceptionHandlerVM eh in list)
-				eh.TypeSigCreator = typeSigCreator;
+			foreach (ExceptionHandlerVM? eh in list)
+				eh!.TypeSigCreator = typeSigCreator;
 		}
 
 		protected override void CopyItemsAsText(ExceptionHandlerVM[] ehs) {

@@ -833,8 +833,8 @@
   <data name="AboutScreen_LoadedFiles" xml:space="preserve">
     <value>Loaded files:</value>
   </data>
-  <data name="SearchWindow_SearchGacAssemblies" xml:space="preserve">
-    <value>Search in GAC assemblies</value>
+  <data name="SearchWindow_SearchFrameworkAssemblies" xml:space="preserve">
+    <value>Search in framework assemblies</value>
   </data>
   <data name="SearchWindow_Where_AllFiles" xml:space="preserve">
     <value>All Files</value>
@@ -2057,5 +2057,14 @@ Filter can be changed in Assembly Explorer options.</value>
   </data>
   <data name="TreeViewTypesFolder" xml:space="preserve">
     <value>Types</value>
+  </data>
+  <data name="NumberBaseFormatString" xml:space="preserve">
+    <value>Base {0}:</value>
+  </data>
+  <data name="RawValue" xml:space="preserve">
+    <value>Raw:</value>
+  </data>
+  <data name="RecentFilesCommand" xml:space="preserve">
+    <value>Recent _Files</value>
   </data>
 </root>

@@ -265,7 +265,7 @@ namespace dnSpy.AsmEditor.DnlibDialogs {
 		public bool CustomMarshalType_Cookie_IsEnabled => IsEnabled;
 		public NullableCompressedUInt32 InterfaceMarshalType_IidParamIndex { get; }
 		public bool InterfaceMarshalType_IidParamIndex_IsEnabled => IsEnabled;
-		public string TypeString => NativeType.SelectedItem!.ToString();
+		public string TypeString => NativeType.SelectedItem!.ToString()!;
 		void TypeStringUpdated() => OnPropertyChanged(nameof(TypeString));
 
 		public MarshalTypeVM(ModuleDef ownerModule, IDecompilerService decompilerService, TypeDef? ownerType, MethodDef? ownerMethod) {
@@ -323,7 +323,7 @@ namespace dnSpy.AsmEditor.DnlibDialogs {
 		public string CustomMarshalType_CustMarshaler_TypeHeader =>
 			string.Format(dnSpy_AsmEditor_Resources.Type, CustomMarshalType_CustMarshaler_TypeSigCreator.TypeSigDnlibFullName);
 
-		void safeArrayMarshalType_userDefinedSubType_typeSigCreator_PropertyChanged(object sender, PropertyChangedEventArgs e) {
+		void safeArrayMarshalType_userDefinedSubType_typeSigCreator_PropertyChanged(object? sender, PropertyChangedEventArgs e) {
 			if (e.PropertyName == nameof(SafeArrayMarshalType_UserDefinedSubType_TypeSigCreator.TypeSigDnlibFullName))
 				OnPropertyChanged(nameof(SafeArrayMarshalType_UserDefinedSubType_TypeHeader));
 			OnSafeArrayMarshalTypeIsEnabledChanged();
@@ -331,7 +331,7 @@ namespace dnSpy.AsmEditor.DnlibDialogs {
 			HasErrorUpdated();
 		}
 
-		void customMarshalType_custMarshaler_typeSigCreator_PropertyChanged(object sender, PropertyChangedEventArgs e) {
+		void customMarshalType_custMarshaler_typeSigCreator_PropertyChanged(object? sender, PropertyChangedEventArgs e) {
 			if (e.PropertyName == nameof(CustomMarshalType_CustMarshaler_TypeSigCreator.TypeSigDnlibFullName))
 				OnPropertyChanged(nameof(CustomMarshalType_CustMarshaler_TypeHeader));
 			TypeStringUpdated();

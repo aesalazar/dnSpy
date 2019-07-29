@@ -52,9 +52,8 @@ namespace dnSpy.Roslyn.Intellisense.Completions {
 			if (elementType != UIElementType.Tooltip)
 				return null;
 
-			var lastAsyncToolTipContent = lastAsyncToolTipContentWeakReference?.Target as AsyncToolTipContent;
-			if (lastAsyncToolTipContent?.Session == context) {
-				lastAsyncToolTipContent!.Cancel();
+			if (lastAsyncToolTipContentWeakReference?.Target is AsyncToolTipContent lastAsyncToolTipContent && lastAsyncToolTipContent.Session == context) {
+				lastAsyncToolTipContent.Cancel();
 				lastAsyncToolTipContentWeakReference = null;
 			}
 
@@ -109,8 +108,8 @@ namespace dnSpy.Roslyn.Intellisense.Completions {
 			}
 
 			void InitializeDefaultDocumentation() => Visibility = Visibility.Collapsed;
-			void AsyncToolTipContent_Unloaded(object sender, RoutedEventArgs e) => Cancel();
-			void Session_Dismissed(object sender, EventArgs e) => Cancel();
+			void AsyncToolTipContent_Unloaded(object? sender, RoutedEventArgs e) => Cancel();
+			void Session_Dismissed(object? sender, EventArgs e) => Cancel();
 
 			public void Cancel() {
 				if (disposed)

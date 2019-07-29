@@ -20,8 +20,8 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
@@ -161,7 +161,7 @@ namespace dnSpy.Tabs {
 				uiElem.IsVisibleChanged += uiElem_IsVisibleChanged;
 			}
 
-			void uiElem_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e) {
+			void uiElem_IsVisibleChanged(object? sender, DependencyPropertyChangedEventArgs e) {
 				uiElem.IsVisibleChanged -= uiElem_IsVisibleChanged;
 				if (tabGroup.IsActiveTab(content))
 					callback();
@@ -169,7 +169,8 @@ namespace dnSpy.Tabs {
 		}
 
 		TabItemImpl? GetTabItemImpl(ITabContent content) {
-			foreach (TabItemImpl impl in tabControl.Items) {
+			foreach (TabItemImpl? impl in tabControl.Items) {
+				Debug.Assert(!(impl is null));
 				if (impl.TabContent == content)
 					return impl;
 			}
@@ -224,7 +225,7 @@ namespace dnSpy.Tabs {
 				contextMenuProvider = menuService.InitializeContextMenu(tabControl, options.TabGroupGuid, new GuidObjectsProvider(this));
 		}
 
-		void TabControl_PreviewKeyDown(object sender, KeyEventArgs e) {
+		void TabControl_PreviewKeyDown(object? sender, KeyEventArgs e) {
 			// Tool windows hack: if there's only one tool window in the TabControl, the tab is
 			// hidden, but this causes a crash in TabControl when we press Ctrl+Tab.
 			if (tabControl.Items.Count == 1 && e.Key == Key.Tab && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control) {
@@ -233,7 +234,7 @@ namespace dnSpy.Tabs {
 			}
 		}
 
-		void TabControl_SelectionChanged(object sender, SelectionChangedEventArgs e) {
+		void TabControl_SelectionChanged(object? sender, SelectionChangedEventArgs e) {
 			if (sender != tabControl || e.Source != tabControl)
 				return;
 			Debug.Assert(e.RemovedItems.Count <= 1);
@@ -284,7 +285,7 @@ namespace dnSpy.Tabs {
 			impl.RemoveHandler(UIElement.LostKeyboardFocusEvent, new KeyboardFocusChangedEventHandler(tabItem_LostKeyboardFocus));
 		}
 
-		void tabItem_GotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e) {
+		void tabItem_GotKeyboardFocus(object? sender, KeyboardFocusChangedEventArgs e) {
 			tabGroupService.SetActive(this);
 			var tabItem = GetTabItemImpl(sender);
 			if (!(tabItem is null))
@@ -292,14 +293,14 @@ namespace dnSpy.Tabs {
 			IsActive = true;
 		}
 
-		void tabItem_LostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e) {
+		void tabItem_LostKeyboardFocus(object? sender, KeyboardFocusChangedEventArgs e) {
 			var tabItem = GetTabItemImpl(sender);
 			if (!(tabItem is null))
 				tabItem.IsActive = false;
 			IsActive = false;
 		}
 
-		TabItemImpl? GetTabItemImpl(object o) {
+		TabItemImpl? GetTabItemImpl(object? o) {
 			var tabItem = o as TabItemImpl;
 			if (tabItem is null)
 				return null;
@@ -308,16 +309,16 @@ namespace dnSpy.Tabs {
 			return tabItem;
 		}
 
-		void tabItem_MouseRightButtonDown(object sender, MouseButtonEventArgs e) {
+		void tabItem_MouseRightButtonDown(object? sender, MouseButtonEventArgs e) {
 			var tabItem = GetTabItemImpl(sender);
 			if (tabItem is null)
 				return;
 			tabControl.SelectedItem = tabItem;
 		}
 
-		bool IsDragArea(object sender, MouseEventArgs e, TabItem tabItem) => IsDraggableAP.GetIsDraggable(e.OriginalSource as FrameworkElement);
+		bool IsDragArea(object? sender, MouseEventArgs e, TabItem tabItem) => IsDraggableAP.GetIsDraggable(e.OriginalSource as FrameworkElement);
 
-		bool GetTabItem(object sender, MouseEventArgs e, [NotNullWhenTrue] out TabItemImpl? tabItem, [NotNullWhenTrue] out TabControl? tabControl) {
+		bool GetTabItem(object? sender, MouseEventArgs e, [NotNullWhen(true)] out TabItemImpl? tabItem, [NotNullWhen(true)] out TabControl? tabControl) {
 			tabItem = null;
 			tabControl = null;
 
@@ -335,7 +336,7 @@ namespace dnSpy.Tabs {
 			return true;
 		}
 
-		void tabItem_PreviewMouseDown(object sender, MouseButtonEventArgs e) {
+		void tabItem_PreviewMouseDown(object? sender, MouseButtonEventArgs e) {
 			if (!GetTabItem(sender, e, out var tabItem, out var tabControl))
 				return;
 
@@ -351,9 +352,9 @@ namespace dnSpy.Tabs {
 		}
 		bool possibleDrag;
 
-		void tabItem_PreviewMouseUp(object sender, MouseButtonEventArgs e) => possibleDrag = false;
+		void tabItem_PreviewMouseUp(object? sender, MouseButtonEventArgs e) => possibleDrag = false;
 
-		void tabItem_PreviewMouseMove(object sender, MouseEventArgs e) {
+		void tabItem_PreviewMouseMove(object? sender, MouseEventArgs e) {
 			bool oldPossibleDrag = possibleDrag;
 			possibleDrag = false;
 			if (!oldPossibleDrag)
@@ -374,9 +375,9 @@ namespace dnSpy.Tabs {
 			}
 		}
 
-		bool GetInfo(object sender, DragEventArgs e,
-					[NotNullWhenTrue] out TabItemImpl? tabItemSource, [NotNullWhenTrue] out TabItemImpl? tabItemTarget,
-					[NotNullWhenTrue] out TabGroup? tabGroupSource, [NotNullWhenTrue] out TabGroup? tabGroupTarget,
+		bool GetInfo(object? sender, DragEventArgs e,
+					[NotNullWhen(true)] out TabItemImpl? tabItemSource, [NotNullWhen(true)] out TabItemImpl? tabItemTarget,
+					[NotNullWhen(true)] out TabGroup? tabGroupSource, [NotNullWhen(true)] out TabGroup? tabGroupTarget,
 					bool canBeSame) {
 			tabItemSource = tabItemTarget = null;
 			tabGroupSource = tabGroupTarget = null;
@@ -407,7 +408,7 @@ namespace dnSpy.Tabs {
 			return true;
 		}
 
-		void tabItem_DragOver(object sender, DragEventArgs e) {
+		void tabItem_DragOver(object? sender, DragEventArgs e) {
 			var tabItem = GetTabItemImpl(sender);
 			if (tabItem is null)
 				return;
@@ -419,7 +420,7 @@ namespace dnSpy.Tabs {
 			e.Handled = true;
 		}
 
-		void tabItem_Drop(object sender, DragEventArgs e) {
+		void tabItem_Drop(object? sender, DragEventArgs e) {
 			if (!GetInfo(sender, e, out var tabItemSource, out var tabItemTarget, out var tabGroupSource, out var tabGroupTarget, false))
 				return;
 

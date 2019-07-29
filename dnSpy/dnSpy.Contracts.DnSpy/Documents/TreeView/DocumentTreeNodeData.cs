@@ -20,6 +20,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows;
@@ -86,15 +87,14 @@ namespace dnSpy.Contracts.Documents.TreeView {
 		/// </summary>
 		public sealed override object? Text {
 			get {
-				var cached = cachedText?.Target;
-				if (!(cached is null))
+				if (cachedText?.Target is object cached)
 					return cached;
 
 				var writer = Cache.GetWriter();
 				try {
 					WriteCore(writer, Context.Decompiler, DocumentNodeWriteOptions.None);
 					var classifierContext = new TreeViewNodeClassifierContext(writer.Text, Context.DocumentTreeView.TreeView, this, isToolTip: false, colorize: Context.SyntaxHighlight, colors: writer.Colors);
-					var elem = Context.TreeViewNodeTextElementProvider.CreateTextElement(classifierContext, TreeViewContentTypes.TreeViewNodeAssemblyExplorer, TextElementFlags.FilterOutNewLines | (Context.UseNewRenderer ? TextElementFlags.NewFormatter : 0));
+					var elem = Context.TreeViewNodeTextElementProvider.CreateTextElement(classifierContext, TreeViewContentTypes.TreeViewNodeAssemblyExplorer, TextElementFlags.FilterOutNewLines);
 					cachedText = new WeakReference(elem);
 					return elem;
 				}
@@ -138,7 +138,7 @@ namespace dnSpy.Contracts.Documents.TreeView {
 				var writer = Cache.GetWriter();
 				WriteCore(writer, Context.Decompiler, DocumentNodeWriteOptions.ToolTip);
 				var classifierContext = new TreeViewNodeClassifierContext(writer.Text, Context.DocumentTreeView.TreeView, this, isToolTip: true, colorize: Context.SyntaxHighlight, colors: writer.Colors);
-				var elem = Context.TreeViewNodeTextElementProvider.CreateTextElement(classifierContext, TreeViewContentTypes.TreeViewNodeAssemblyExplorer, Context.UseNewRenderer ? TextElementFlags.NewFormatter : 0);
+				var elem = Context.TreeViewNodeTextElementProvider.CreateTextElement(classifierContext, TreeViewContentTypes.TreeViewNodeAssemblyExplorer, TextElementFlags.None);
 				Cache.FreeWriter(writer);
 				return elem;
 			}
@@ -380,6 +380,40 @@ namespace dnSpy.Contracts.Documents.TreeView {
 				decompiler.WriteToolTip(output, declType, declType);
 			}
 		}
+
+		/// <summary>
+		/// Gets data added by <see cref="AddData{T}(T)"/>
+		/// </summary>
+		/// <typeparam name="T">Type of data</typeparam>
+		/// <param name="data">Updated with the data if successful</param>
+		/// <returns></returns>
+		public bool TryGetData<T>([NotNullWhen(true)] out T? data) where T : class {
+			if (!(dataList is null)) {
+				foreach (var obj in dataList) {
+					if (obj is T t) {
+						data = t;
+						return true;
+					}
+				}
+			}
+
+			data = null;
+			return false;
+		}
+
+		/// <summary>
+		/// Adds data
+		/// </summary>
+		/// <typeparam name="T">Type of data</typeparam>
+		/// <param name="data">Data</param>
+		public void AddData<T>(T data) where T : class {
+			if (data is null)
+				throw new ArgumentNullException(nameof(data));
+			if (dataList is null)
+				dataList = new List<object>();
+			dataList.Add(data);
+		}
+		List<object>? dataList;
 	}
 
 	/// <summary>
@@ -435,7 +469,17 @@ namespace dnSpy.Contracts.Documents.TreeView {
 		/// <returns></returns>
 		public static ModuleDef? GetModule(this TreeNodeData? self) {
 			var node = self.GetDocumentNode();
-			return node is null ? null : node.Document.ModuleDef;
+			return node?.Document.ModuleDef;
+		}
+
+		/// <summary>
+		/// Gets the <see cref="ModuleDef"/> instance or null
+		/// </summary>
+		/// <param name="self">This</param>
+		/// <returns></returns>
+		public static ModuleDef? GetParentModule(this TreeNodeData? self) {
+			var node = self?.TreeNode.Parent?.Data.GetDocumentNode();
+			return node?.Document.ModuleDef;
 		}
 	}
 }

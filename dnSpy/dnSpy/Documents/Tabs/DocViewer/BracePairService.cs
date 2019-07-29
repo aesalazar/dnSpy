@@ -235,7 +235,7 @@ namespace dnSpy.Documents.Tabs.DocViewer {
 	}
 
 	interface IBracePairService {
-		void SetBracePairCollection(BracePairCollection bracePairCollection);
+		void SetBracePairCollection(BracePairCollection? bracePairCollection);
 		void SetBracePairViewTagger(BracePairViewTagger tagger);
 		IEnumerable<ITagSpan<IBracePairTag>> GetTags(NormalizedSnapshotSpanCollection spans);
 	}
@@ -255,7 +255,7 @@ namespace dnSpy.Documents.Tabs.DocViewer {
 			UpdateBraceMatching();
 		}
 
-		void Options_OptionChanged(object sender, EditorOptionChangedEventArgs e) {
+		void Options_OptionChanged(object? sender, EditorOptionChangedEventArgs e) {
 			if (textView.IsClosed)
 				return;
 			if (e.OptionId == DefaultDsTextViewOptions.BraceMatchingName)
@@ -294,7 +294,7 @@ namespace dnSpy.Documents.Tabs.DocViewer {
 			return null;
 		}
 
-		void Caret_PositionChanged(object sender, CaretPositionChangedEventArgs e) => UpdateBracePairs();
+		void Caret_PositionChanged(object? sender, CaretPositionChangedEventArgs e) => UpdateBracePairs();
 
 		void UpdateBracePairs(bool refresh = true) {
 			var newBracePair = GetCurrentBracePair();
@@ -348,7 +348,7 @@ namespace dnSpy.Documents.Tabs.DocViewer {
 			}
 		}
 
-		public void SetBracePairCollection(BracePairCollection bracePairCollection) {
+		public void SetBracePairCollection(BracePairCollection? bracePairCollection) {
 			this.bracePairCollection = bracePairCollection ?? BracePairCollection.Empty;
 			RefreshAllTags();
 		}
@@ -375,7 +375,7 @@ namespace dnSpy.Documents.Tabs.DocViewer {
 			}
 		}
 
-		void TextView_Closed(object sender, EventArgs e) {
+		void TextView_Closed(object? sender, EventArgs e) {
 			currentBracePair = null;
 			bracePairCollection = BracePairCollection.Empty;
 			textView.Closed -= TextView_Closed;

@@ -117,7 +117,7 @@ namespace dnSpy.MainApp {
 			Debug.Assert(!(attr is null));
 			if (!(attr is null))
 				return attr.InformationalVersion;
-			return asm.GetName().Version.ToString();
+			return asm.GetName().Version!.ToString();
 		}
 
 		static readonly Rect DefaultWindowLocation = new Rect(10, 10, 1300, 730);
@@ -161,7 +161,7 @@ namespace dnSpy.MainApp {
 			mainWindowControl.Initialize(StackedContentChildImpl.GetOrCreate(documentTabService.TabGroupService, documentTabService.TabGroupService.UIObject), uiSettings.MainWindowControlState);
 		}
 
-		void MainWindow_Closing(object sender, CancelEventArgs e) {
+		void MainWindow_Closing(object? sender, CancelEventArgs e) {
 			mainWindowClosing.Raise(this, e);
 			if (e.Cancel)
 				return;
@@ -171,9 +171,9 @@ namespace dnSpy.MainApp {
 			uiSettings.Write();
 		}
 
-		void MainWindow_Closed(object sender, EventArgs e) => mainWindowClosed.Raise(this, e);
+		void MainWindow_Closed(object? sender, EventArgs e) => mainWindowClosed.Raise(this, e);
 
-		void MainWindow_GotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e) {
+		void MainWindow_GotKeyboardFocus(object? sender, KeyboardFocusChangedEventArgs e) {
 			if (e.NewFocus == MainWindow) {
 				var g = documentTabService.TabGroupService.ActiveTabGroup;
 				if (!(g is null) && !(g.ActiveTabContent is null)) {

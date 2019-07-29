@@ -193,7 +193,7 @@ namespace dnSpy.Documents.Tabs {
 			decompiler.WriteCommentLine(output, NameUtilities.CleanName(node.ToString(decompiler)));
 		}
 
-		void Decompile(AssemblyReferenceNode node) => decompiler.WriteCommentLine(output, NameUtilities.CleanName(node.AssemblyRef.ToString()));
+		void Decompile(AssemblyReferenceNode node) => decompiler.WriteCommentLine(output, NameUtilities.CleanName(node.AssemblyRef.ToString()!));
 
 		void Decompile(BaseTypeFolderNode node) {
 			foreach (var child in GetChildren(node).OfType<BaseTypeNode>())
@@ -208,7 +208,7 @@ namespace dnSpy.Documents.Tabs {
 				Decompile(child);
 		}
 
-		void Decompile(ModuleReferenceNode node) => decompiler.WriteCommentLine(output, NameUtilities.CleanName(node.ModuleRef.ToString()));
+		void Decompile(ModuleReferenceNode node) => decompiler.WriteCommentLine(output, NameUtilities.CleanName(node.ModuleRef.ToString()!));
 
 		void Decompile(NamespaceNode node) {
 			var children = GetChildren(node).OfType<TypeNode>().Select(a => a.TypeDef).ToArray();
@@ -248,7 +248,7 @@ namespace dnSpy.Documents.Tabs {
 				if (child is ResourceNode)
 					Decompile((ResourceNode)child);
 				else
-					DecompileUnknown(child);
+					Decompile(child);
 			}
 		}
 
@@ -269,7 +269,7 @@ namespace dnSpy.Documents.Tabs {
 				if (child is ResourceElementNode)
 					Decompile((ResourceElementNode)child);
 				else
-					DecompileUnknown(child);
+					Decompile(child);
 			}
 		}
 

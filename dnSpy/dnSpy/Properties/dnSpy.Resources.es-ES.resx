@@ -211,7 +211,7 @@
     <value>Tipos Derivados</value>
   </data>
   <data name="DotNetExes" xml:space="preserve">
-    <value>Ejecutables .NET</value>
+    <value>_Archivos recientes</value>
   </data>
   <data name="EmptyTabTitle" xml:space="preserve">
     <value>&lt;vacio&gt;</value>
@@ -833,8 +833,8 @@
   <data name="AboutScreen_LoadedFiles" xml:space="preserve">
     <value>Archivos cargados:</value>
   </data>
-  <data name="SearchWindow_SearchGacAssemblies" xml:space="preserve">
-    <value>Buscar en ensamblados GAC</value>
+  <data name="SearchWindow_SearchFrameworkAssemblies" xml:space="preserve">
+    <value>Buscar en ensamblados Framework</value>
   </data>
   <data name="SearchWindow_Where_AllFiles" xml:space="preserve">
     <value>Todos los archivos</value>
@@ -1548,7 +1548,7 @@
     <value>Ctrl+Mayús+A</value>
   </data>
   <data name="ShortCutKeyCtrlShiftR" xml:space="preserve">
-    <value>Ctrl+Mayu+R</value>
+    <value>Ctrl+Shift+R</value>
   </data>
   <data name="ShortCutKeyCtrlShiftV" xml:space="preserve">
     <value>Ctrl+Mayús+V</value>
@@ -2056,5 +2056,14 @@
   </data>
   <data name="TreeViewTypesFolder" xml:space="preserve">
     <value>Tipos</value>
+  </data>
+  <data name="NumberBaseFormatString" xml:space="preserve">
+    <value>Base {0}:</value>
+  </data>
+  <data name="RawValue" xml:space="preserve">
+    <value>En bruto:</value>
+  </data>
+  <data name="RecentFilesCommand" xml:space="preserve">
+    <value>_Archivos recientes</value>
   </data>
 </root>

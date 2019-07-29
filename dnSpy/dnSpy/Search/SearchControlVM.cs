@@ -77,7 +77,7 @@ namespace dnSpy.Search {
 				if (selectedSearchTypeVM != value) {
 					selectedSearchTypeVM = value;
 					OnPropertyChanged(nameof(SelectedSearchTypeVM));
-					Restart();
+					SearchSettings.SearchType = selectedSearchTypeVM.SearchType;
 				}
 			}
 		}
@@ -133,14 +133,13 @@ namespace dnSpy.Search {
 			this.documentTreeView = documentTreeView;
 			this.decompiler = decompiler;
 			SearchSettings = searchSettings;
-			searchSettings.PropertyChanged += SearchSettings_PropertyChanged;
 			delayedSearch = new DelayedAction(DEFAULT_DELAY_SEARCH_MS, DelayStartSearch);
 			SearchTypeVMs = new ObservableCollection<SearchTypeVM>();
 			SearchResults = new ObservableCollection<ISearchResult>();
 			searchResultsCollectionView = (ListCollectionView)CollectionViewSource.GetDefaultView(SearchResults);
 			searchResultsCollectionView.CustomSort = new SearchResult_Comparer();
-			SearchLocationVM = new EnumListVM(searchLocationList, (a, b) => Restart());
-			SearchLocationVM.SelectedItem = SearchLocation.AllFiles;
+			SearchLocationVM = new EnumListVM(searchLocationList, (a, b) => SearchSettings.SearchLocation = (SearchLocation)SearchLocationVM.SelectedItem!);
+			SearchLocationVM.SelectedItem = SearchSettings.SearchLocation;
 
 			Add(SearchType.AssemblyDef, dnSpy_Resources.SearchWindow_Assembly, DsImages.Assembly, null, VisibleMembersFlags.AssemblyDef);
 			Add(SearchType.ModuleDef, dnSpy_Resources.SearchWindow_Module, DsImages.ModulePublic, null, VisibleMembersFlags.ModuleDef);
@@ -167,8 +166,13 @@ namespace dnSpy.Search {
 			Add(SearchType.Any, dnSpy_Resources.SearchWindow_AllAbove, DsImages.ClassPublic, dnSpy_Resources.SearchWindow_AllAbove_Key, VisibleMembersFlags.TreeViewAll | VisibleMembersFlags.ParamDef | VisibleMembersFlags.Local);
 			Add(SearchType.Literal, dnSpy_Resources.SearchWindow_Literal, DsImages.ConstantPublic, dnSpy_Resources.SearchWindow_Literal_Key, VisibleMembersFlags.MethodBody | VisibleMembersFlags.FieldDef | VisibleMembersFlags.ParamDef | VisibleMembersFlags.PropertyDef | VisibleMembersFlags.Resource | VisibleMembersFlags.ResourceElement | VisibleMembersFlags.Attributes);
 
-			SelectedSearchTypeVM = SearchTypeVMs.First(a => a.SearchType == SearchType.Any);
+			UpdateSearchType();
+			searchSettings.PropertyChanged += SearchSettings_PropertyChanged;
 		}
+
+		void UpdateSearchType() =>
+			SelectedSearchTypeVM = SearchTypeVMs.FirstOrDefault(a => a.SearchType == SearchSettings.SearchType) ??
+			SearchTypeVMs.First(a => a.SearchType == SearchType.Any);
 
 		void Add(SearchType searchType, string name, ImageReference icon, string? toolTip, VisibleMembersFlags flags) =>
 			SearchTypeVMs.Add(new SearchTypeVM(searchType, name, toolTip, icon, flags));
@@ -221,16 +225,16 @@ namespace dnSpy.Search {
 		bool searchCompleted;
 
 		bool CanSearchFile(DsDocumentNode node) =>
-			SearchSettings.SearchGacAssemblies || !GacInfo.IsGacPath(node.Document.Filename);
+			SearchSettings.SearchFrameworkAssemblies || !FrameworkFileUtils.IsFrameworkAssembly(node.Document.Filename, node.Document.AssemblyDef?.Name);
 		IEnumerable<DsDocumentNode> GetAllFilesToSearch() =>
 			documentTreeView.TreeView.Root.DataChildren.OfType<DsDocumentNode>().Where(a => CanSearchFile(a));
 		IEnumerable<DsDocumentNode> GetSelectedFilesToSearch() =>
-			documentTreeView.TreeView.TopLevelSelection.Select(a => a.GetTopNode()).Where(a => !(a is null) && CanSearchFile(a)).Distinct()!;
+			documentTreeView.TreeView.TopLevelSelection.Select(a => a.GetDocumentNode()).Where(a => !(a is null) && CanSearchFile(a)).Distinct()!;
 
 		IEnumerable<DsDocumentNode> GetAllFilesInSameDirToSearch() {
 			var dirsEnum = GetSelectedFilesToSearch().Where(a => File.Exists(a.Document.Filename)).Select(a => Path.GetDirectoryName(a.Document.Filename));
-			var dirs = new HashSet<string>(dirsEnum, StringComparer.OrdinalIgnoreCase);
-			return GetAllFilesToSearch().Where(a => File.Exists(a.Document.Filename) && dirs.Contains(Path.GetDirectoryName(a.Document.Filename)));
+			var dirs = new HashSet<string>(dirsEnum!, StringComparer.OrdinalIgnoreCase);
+			return GetAllFilesToSearch().Where(a => File.Exists(a.Document.Filename) && dirs.Contains(Path.GetDirectoryName(a.Document.Filename)!));
 		}
 
 		IEnumerable<SearchTypeInfo> GetSelectedTypeToSearch() {
@@ -239,11 +243,11 @@ namespace dnSpy.Search {
 				Debug.Assert(!(fileNode is null));
 				if (fileNode is null)
 					continue;
-				yield return new SearchTypeInfo(fileNode.Document, node.TypeDef);
+				yield return new SearchTypeInfo(fileNode.Document, node!.TypeDef);
 			}
 		}
 
-		void FileSearcher_OnSearchCompleted(object sender, EventArgs e) {
+		void FileSearcher_OnSearchCompleted(object? sender, EventArgs e) {
 			if (sender is null || sender != fileSearcher || searchCompleted)
 				return;
 			Debug.Assert(!(fileSearcher is null));
@@ -252,7 +256,7 @@ namespace dnSpy.Search {
 			TooManyResults = fileSearcher.TooManyResults;
 		}
 
-		void FileSearcher_OnNewSearchResults(object sender, SearchResultEventArgs e) {
+		void FileSearcher_OnNewSearchResults(object? sender, SearchResultEventArgs e) {
 			if (sender is null || sender != fileSearcher)
 				return;
 			Debug.Assert(!searchCompleted);
@@ -295,8 +299,16 @@ namespace dnSpy.Search {
 			searchCompleted = false;
 		}
 
-		void SearchSettings_PropertyChanged(object sender, PropertyChangedEventArgs e) {
+		void SearchSettings_PropertyChanged(object? sender, PropertyChangedEventArgs e) {
 			switch (e.PropertyName) {
+			case nameof(SearchSettings.SearchLocation):
+				SearchLocationVM.SelectedItem = SearchSettings.SearchLocation;
+				Restart();
+				break;
+			case nameof(SearchSettings.SearchType):
+				UpdateSearchType();
+				Restart();
+				break;
 			case nameof(SearchSettings.SyntaxHighlight):
 				if (!(fileSearcher is null))
 					fileSearcher.SyntaxHighlight = SearchSettings.SyntaxHighlight;
@@ -305,7 +317,7 @@ namespace dnSpy.Search {
 			case nameof(SearchSettings.CaseSensitive):
 			case nameof(SearchSettings.MatchAnySearchTerm):
 			case nameof(SearchSettings.SearchDecompiledData):
-			case nameof(SearchSettings.SearchGacAssemblies):
+			case nameof(SearchSettings.SearchFrameworkAssemblies):
 				Restart();
 				break;
 			}
@@ -313,7 +325,7 @@ namespace dnSpy.Search {
 	}
 
 	sealed class SearchResult_Comparer : System.Collections.IComparer {
-		public int Compare(object x, object y) {
+		public int Compare(object? x, object? y) {
 			var a = x as ISearchResult;
 			var b = y as ISearchResult;
 			if (a is null)

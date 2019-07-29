@@ -258,7 +258,7 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl.COMD {
 			}
 		}
 
-		void DmdDynamicModuleHelper_TypeLoaded_COMThread(object sender, DmdTypeLoadedEventArgs e) {
+		void DmdDynamicModuleHelper_TypeLoaded_COMThread(object? sender, DmdTypeLoadedEventArgs e) {
 			dispatcher.VerifyAccess();
 			bool b = (e.MetadataToken >> 24) == 0x02 && (e.MetadataToken & 0x00FFFFFF) != 0 && MDAPI.IsValidToken(MetaDataImport, (uint)e.MetadataToken);
 			Debug.Assert(b);

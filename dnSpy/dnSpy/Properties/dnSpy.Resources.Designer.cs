@@ -3306,6 +3306,15 @@ namespace dnSpy.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Base {0}:.
+        /// </summary>
+        public static string NumberBaseFormatString {
+            get {
+                return ResourceManager.GetString("NumberBaseFormatString", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to _Open....
         /// </summary>
         public static string OpenCommand {
@@ -3743,6 +3752,24 @@ namespace dnSpy.Properties {
         public static string PasteUTF8Command {
             get {
                 return ResourceManager.GetString("PasteUTF8Command", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Raw:.
+        /// </summary>
+        public static string RawValue {
+            get {
+                return ResourceManager.GetString("RawValue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Recent _Files.
+        /// </summary>
+        public static string RecentFilesCommand {
+            get {
+                return ResourceManager.GetString("RecentFilesCommand", resourceCulture);
             }
         }
         
@@ -4341,11 +4368,11 @@ namespace dnSpy.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Search in GAC assemblies.
+        ///   Looks up a localized string similar to Search in framework assemblies.
         /// </summary>
-        public static string SearchWindow_SearchGacAssemblies {
+        public static string SearchWindow_SearchFrameworkAssemblies {
             get {
-                return ResourceManager.GetString("SearchWindow_SearchGacAssemblies", resourceCulture);
+                return ResourceManager.GetString("SearchWindow_SearchFrameworkAssemblies", resourceCulture);
             }
         }
         

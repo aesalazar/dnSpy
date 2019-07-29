@@ -39,7 +39,7 @@ namespace dnSpy.Roslyn.Debugger.FilterExpressionEvaluator {
 		static EvalDelegateCreator() {
 			toReflectionOpCode = new Dictionary<OpCode, SRE.OpCode>(0x200);
 			foreach (var info in typeof(SRE.OpCodes).GetFields(SR.BindingFlags.Public | SR.BindingFlags.Static)) {
-				var sreOpCode = (SRE.OpCode)info.GetValue(null);
+				var sreOpCode = (SRE.OpCode)info.GetValue(null)!;
 				int value = (ushort)sreOpCode.Value;
 				OpCode? opCode;
 				switch (value >> 8) {
@@ -260,8 +260,8 @@ namespace dnSpy.Roslyn.Debugger.FilterExpressionEvaluator {
 			}
 			throw new EvalDelegateCreatorException();
 		}
-		static readonly SR.MethodInfo SystemString_op_Equality = typeof(FilterExpressionMethods).GetMethod("StringEquals");
-		static readonly SR.MethodInfo SystemString_op_Inequality = typeof(FilterExpressionMethods).GetMethod("StringNotEquals");
+		static readonly SR.MethodInfo SystemString_op_Equality = typeof(FilterExpressionMethods).GetMethod(nameof(FilterExpressionMethods.StringEquals))!;
+		static readonly SR.MethodInfo SystemString_op_Inequality = typeof(FilterExpressionMethods).GetMethod(nameof(FilterExpressionMethods.StringNotEquals))!;
 
 		static bool IsBoolean_StringString(MethodSig sig) {
 			if (sig.RetType.ElementType != ElementType.Boolean)

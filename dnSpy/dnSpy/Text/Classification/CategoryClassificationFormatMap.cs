@@ -119,7 +119,7 @@ namespace dnSpy.Text.Classification {
 			ReinitializeCache();
 		}
 
-		void EditorFormatMap_FormatMappingChanged(object sender, FormatItemsEventArgs e) {
+		void EditorFormatMap_FormatMappingChanged(object? sender, FormatItemsEventArgs e) {
 			ReinitializeCache();
 			ClassificationFormatMappingChanged?.Invoke(this, EventArgs.Empty);
 		}
@@ -225,7 +225,7 @@ namespace dnSpy.Text.Classification {
 		public string GetEditorFormatMapKey(IClassificationType classificationType) {
 			if (classificationType is null)
 				throw new ArgumentNullException(nameof(classificationType));
-			if (!classificationToEditorFormatMapKey.TryGetValue(classificationType.Classification, out string key))
+			if (!classificationToEditorFormatMapKey.TryGetValue(classificationType.Classification, out var key))
 				key = classificationType.Classification;
 			return key;
 		}

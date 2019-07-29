@@ -20,11 +20,11 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Net;
-using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Text;
 using dnSpy.Debugger.DotNet.CorDebug.Impl;
@@ -37,12 +37,14 @@ namespace AppHostInfoGenerator {
 		// The code ignores known versions so all versions can be added.
 		//	^(\S+)\s.*		=>		\t\t\t"\1",
 		static readonly string[] DotNetAppHost_Versions_ToCheck = new string[] {
+			"3.0.0-preview7-27912-14",
 			"3.0.0-preview6-27804-01",
 			"3.0.0-preview5-27626-15",
 			"3.0.0-preview4-27615-11",
 			"3.0.0-preview3-27503-5",
 			"3.0.0-preview-27324-5",
 			"3.0.0-preview-27122-01",
+			"2.2.6",
 			"2.2.5",
 			"2.2.4",
 			"2.2.3",
@@ -52,6 +54,7 @@ namespace AppHostInfoGenerator {
 			"2.2.0-preview3-27014-02",
 			"2.2.0-preview2-26905-02",
 			"2.2.0-preview-26820-02",
+			"2.1.12",
 			"2.1.11",
 			"2.1.10",
 			"2.1.9",
@@ -101,7 +104,7 @@ namespace AppHostInfoGenerator {
 			string filename;
 			switch (args.Length) {
 			case 0:
-				filename = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(typeof(Program).Assembly.Location), "..", "..", "..", "..", "dnSpy.Debugger.DotNet.CorDebug", "Impl", defaultFilename));
+				filename = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(typeof(Program).Assembly.Location)!, "..", "..", "..", "..", "dnSpy.Debugger.DotNet.CorDebug", "Impl", defaultFilename));
 				break;
 			case 1:
 				filename = args[0];
@@ -435,14 +438,21 @@ namespace AppHostInfoGenerator {
 		void SerializeCompressedUInt32(uint value, string name, string? commentValue = null) {
 			output.Write(serializeIndent);
 
-			if (value <= 0x7F)
-				output.Write($"0x{((byte)value).ToString("X2")},");
-			else if (value <= 0x3FFF)
-				output.Write($"0x{((byte)((value >> 8) | 0x80)).ToString("X2")}, 0x{((byte)value).ToString("X2")},");
-			else if (value <= 0x1FFFFFFF)
-				output.Write($"0x{((byte)((value >> 24) | 0xC0)).ToString("X2")}, 0x{((byte)(value >> 16)).ToString("X2")}, 0x{((byte)(value >> 8)).ToString("X2")}, 0x{((byte)value).ToString("X2")},");
-			else
-				throw new InvalidOperationException();
+			bool needSpace = false;
+			var currentValue = value;
+			for (;;) {
+				if (needSpace)
+					output.Write(" ");
+				needSpace = true;
+				uint v = currentValue;
+				if (v < 0x80)
+					output.Write($"0x{((byte)currentValue).ToString("X2")},");
+				else
+					output.Write($"0x{((byte)(currentValue | 0x80)).ToString("X2")},");
+				currentValue >>= 7;
+				if (currentValue == 0)
+					break;
+			}
 
 			if (commentValue is null)
 				commentValue = "0x" + value.ToString("X8");
@@ -483,7 +493,7 @@ namespace AppHostInfoGenerator {
 			output.WriteLine();
 		}
 
-		static bool TryHashData(byte[] appHostData, int relPathOffset, int textOffset, int textSize, out int hashDataOffset, out int hashDataSize, [NotNullWhenTrue] out byte[]? hash, out byte lastByte) {
+		static bool TryHashData(byte[] appHostData, int relPathOffset, int textOffset, int textSize, out int hashDataOffset, out int hashDataSize, [NotNullWhen(true)] out byte[]? hash, out byte lastByte) {
 			hashDataOffset = textOffset;
 			hashDataSize = Math.Min(textSize, AppHostInfo.DefaultHashSize);
 			int hashDataSizeEnd = hashDataOffset + hashDataSize;
@@ -559,7 +569,7 @@ namespace AppHostInfoGenerator {
 			}
 		}
 
-		static bool TryGetRid(string fullName, [NotNullWhenTrue] out string? rid, [NotNullWhenTrue] out string? filename) {
+		static bool TryGetRid(string fullName, [NotNullWhen(true)] out string? rid, [NotNullWhen(true)] out string? filename) {
 			rid = null;
 			filename = null;
 			var parts = fullName.Split('/');
@@ -595,7 +605,7 @@ namespace AppHostInfoGenerator {
 				return wc.DownloadData(url);
 		}
 
-		static bool TryDownloadNuGetPackage(string packageName, string version, NuGetSource nugetSource, [NotNullWhenTrue] out byte[]? data) {
+		static bool TryDownloadNuGetPackage(string packageName, string version, NuGetSource nugetSource, [NotNullWhen(true)] out byte[]? data) {
 			try {
 				data = DownloadNuGetPackage(packageName, version, nugetSource);
 				return true;

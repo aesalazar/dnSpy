@@ -36,7 +36,7 @@ namespace dnSpy.AsmEditor.Themes {
 			InitializeResources();
 		}
 
-		void ThemeService_ThemeChanged(object sender, ThemeChangedEventArgs e) => InitializeResources();
+		void ThemeService_ThemeChanged(object? sender, ThemeChangedEventArgs e) => InitializeResources();
 
 		void InitializeResources() {
 			var theme = themeService.Theme;
@@ -44,7 +44,7 @@ namespace dnSpy.AsmEditor.Themes {
 			foreach (var f in typeof(TextColor).GetFields()) {
 				if (!f.IsLiteral)
 					continue;
-				var val = (TextColor)f.GetValue(null);
+				var val = (TextColor)f.GetValue(null)!;
 				if (val != TextColor.Last)
 					UpdateTextEditorResource(val, f.Name);
 			}

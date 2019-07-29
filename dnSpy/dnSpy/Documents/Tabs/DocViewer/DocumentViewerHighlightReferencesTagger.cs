@@ -97,7 +97,7 @@ namespace dnSpy.Documents.Tabs.DocViewer {
 			UpdateReferenceHighlighting();
 		}
 
-		void Options_OptionChanged(object sender, EditorOptionChangedEventArgs e) {
+		void Options_OptionChanged(object? sender, EditorOptionChangedEventArgs e) {
 			if (e.OptionId == DefaultDsTextViewOptions.ReferenceHighlightingName)
 				UpdateReferenceHighlighting();
 		}
@@ -145,7 +145,7 @@ namespace dnSpy.Documents.Tabs.DocViewer {
 			documentViewer.GotNewContent += DocumentViewer_GotNewContent;
 		}
 
-		void DocumentViewer_GotNewContent(object sender, DocumentViewerGotNewContentEventArgs e) {
+		void DocumentViewer_GotNewContent(object? sender, DocumentViewerGotNewContentEventArgs e) {
 			spanReferenceCollection = documentViewer?.Content.GetCustomData<SpanDataCollection<ReferenceAndId>>(DocumentViewerContentDataIds.SpanReference) ?? SpanDataCollection<ReferenceAndId>.Empty;
 			currentReference = GetCurrentReference();
 			currentSpanReference = GetCurrentSpanReference();
@@ -185,6 +185,7 @@ namespace dnSpy.Documents.Tabs.DocViewer {
 				bool b = documentViewerReferenceEnablerProviders.TryGetValue(id, out var lazy);
 				Debug.Assert(b, $"Missing {nameof(IDocumentViewerReferenceEnablerProvider)} for reference id = {id}");
 				if (b) {
+					Debug.Assert(!(lazy is null));
 					refChecker = lazy.Value.Create(documentViewer);
 					if (!(refChecker is null))
 						refChecker.IsEnabledChanged += DocumentViewerReferenceEnabler_IsEnabledChanged;
@@ -197,7 +198,7 @@ namespace dnSpy.Documents.Tabs.DocViewer {
 			return refChecker?.IsEnabled ?? true;
 		}
 
-		void DocumentViewerReferenceEnabler_IsEnabledChanged(object sender, EventArgs e) {
+		void DocumentViewerReferenceEnabler_IsEnabledChanged(object? sender, EventArgs e) {
 			if (documentViewer is null || documentViewer.TextView.IsClosed)
 				return;
 			RefreshAllTags();
@@ -244,7 +245,7 @@ namespace dnSpy.Documents.Tabs.DocViewer {
 						Debug.Assert(spanData.Span.End <= snapshot.Length);
 						if (spanData.Span.End > snapshot.Length)
 							continue;
-						if (spanData.Data.IsHidden)
+						if (spanData.Data.IsHidden || spanData.Data.NoFollow)
 							continue;
 						var tag = TryGetTextMarkerTag(spanData);
 						if (tag is null)
@@ -273,7 +274,7 @@ namespace dnSpy.Documents.Tabs.DocViewer {
 			return object.Equals(a.Value.Data.Reference, b.Value.Data.Reference);
 		}
 
-		void Caret_PositionChanged(object sender, CaretPositionChangedEventArgs e) {
+		void Caret_PositionChanged(object? sender, CaretPositionChangedEventArgs e) {
 			if (documentViewer is null)
 				return;
 
@@ -306,7 +307,7 @@ namespace dnSpy.Documents.Tabs.DocViewer {
 			TagsChanged?.Invoke(this, new SnapshotSpanEventArgs(new SnapshotSpan(snapshot, 0, snapshot.Length)));
 		}
 
-		void TextView_Closed(object sender, EventArgs e) {
+		void TextView_Closed(object? sender, EventArgs e) {
 			if (!(documentViewerReferenceEnablers is null)) {
 				foreach (var v in documentViewerReferenceEnablers.Values) {
 					if (v is null)

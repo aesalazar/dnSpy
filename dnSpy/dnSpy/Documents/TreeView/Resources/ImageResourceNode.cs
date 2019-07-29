@@ -19,6 +19,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Windows.Media;
 using dnlib.DotNet;
@@ -36,7 +37,7 @@ using dnSpy.Properties;
 namespace dnSpy.Documents.TreeView.Resources {
 	[ExportResourceNodeProvider(Order = DocumentTreeViewConstants.ORDER_RSRCPROVIDER_IMAGE_RESOURCE_NODE)]
 	sealed class ImageResourceNodeProvider : IResourceNodeProvider {
-		public ResourceNode? Create(ModuleDef module, Resource resource, ITreeNodeGroup treeNodeGroup) {
+		public DocumentTreeNodeData? Create(ModuleDef module, Resource resource, ITreeNodeGroup treeNodeGroup) {
 			var er = resource as EmbeddedResource;
 			if (er is null)
 				return null;
@@ -48,7 +49,7 @@ namespace dnSpy.Documents.TreeView.Resources {
 			return new ImageResourceNodeImpl(treeNodeGroup, er);
 		}
 
-		public ResourceElementNode? Create(ModuleDef module, ResourceElement resourceElement, ITreeNodeGroup treeNodeGroup) {
+		public DocumentTreeNodeData? Create(ModuleDef module, ResourceElement resourceElement, ITreeNodeGroup treeNodeGroup) {
 			if (resourceElement.ResourceData.Code != ResourceTypeCode.ByteArray && resourceElement.ResourceData.Code != ResourceTypeCode.Stream)
 				return null;
 
@@ -193,6 +194,7 @@ namespace dnSpy.Documents.TreeView.Resources {
 
 		protected override IEnumerable<ResourceData> GetDeserializedData() {
 			var id = imageData;
+			Debug.Assert(!(id is null));
 			yield return new ResourceData(ResourceElement.Name, token => new MemoryStream(id));
 		}
 

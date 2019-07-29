@@ -45,6 +45,7 @@ using dnSpy.Contracts.Settings;
 using dnSpy.Controls;
 using dnSpy.Culture;
 using dnSpy.Documents.Tabs.Dialogs;
+using dnSpy.Documents.TreeView;
 using dnSpy.Extension;
 using dnSpy.Images;
 using dnSpy.Roslyn.Text.Classification;
@@ -253,7 +254,7 @@ namespace dnSpy.MainApp {
 			}
 		}
 
-		void ResourceManagerTokenCacheImpl_TokensUpdated(object sender, EventArgs e) => OnTokensUpdated();
+		void ResourceManagerTokenCacheImpl_TokensUpdated(object? sender, EventArgs e) => OnTokensUpdated();
 
 		void OnTokensUpdated() {
 			if (writingCachedMefFile)
@@ -326,7 +327,7 @@ namespace dnSpy.MainApp {
 			var files = GetExtensionFiles(dir).OrderBy(a => a, StringComparer.OrdinalIgnoreCase).ToArray();
 #if NETCOREAPP
 			foreach (var file in files)
-				netCoreAssemblyLoader.AddSearchPath(Path.GetDirectoryName(file));
+				netCoreAssemblyLoader.AddSearchPath(Path.GetDirectoryName(file)!);
 #endif
 			var asms = new List<Assembly>();
 			foreach (var file in files) {
@@ -389,7 +390,7 @@ namespace dnSpy.MainApp {
 			var config = ExtensionConfigReader.Read(xmlFile);
 			return config.IsSupportedOSversion(Environment.OSVersion.Version) &&
 				config.IsSupportedFrameworkVersion(Environment.Version) &&
-				config.IsSupportedAppVersion(GetType().Assembly.GetName().Version);
+				config.IsSupportedAppVersion(GetType().Assembly.GetName().Version!);
 		}
 
 		bool CanLoadExtension(Assembly asm) {
@@ -404,7 +405,7 @@ namespace dnSpy.MainApp {
 			return true;
 		}
 
-		static bool Equals(byte[] a, byte[] b) {
+		static bool Equals(byte[]? a, byte[]? b) {
 			if (a is null || b is null || a.Length != b.Length)
 				return false;
 			for (int i = 0; i < a.Length; i++) {
@@ -480,7 +481,7 @@ namespace dnSpy.MainApp {
 			return COPYDATASTRUCT_result;
 		}
 
-		void MainWindow_SourceInitialized(object sender, EventArgs e) {
+		void MainWindow_SourceInitialized(object? sender, EventArgs e) {
 			Debug.Assert(!(appWindow is null));
 			appWindow.MainWindow.SourceInitialized -= MainWindow_SourceInitialized;
 
@@ -490,7 +491,7 @@ namespace dnSpy.MainApp {
 				hwndSource.AddHook(WndProc);
 		}
 
-		void App_Exit(object sender, ExitEventArgs e) {
+		void App_Exit(object? sender, ExitEventArgs e) {
 			extensionService?.OnAppExit();
 			dsLoaderService?.Save();
 			try {
@@ -558,7 +559,7 @@ namespace dnSpy.MainApp {
 			win.Show();
 		}
 
-		void DsLoaderService_OnAppLoaded(object sender, EventArgs e) {
+		void DsLoaderService_OnAppLoaded(object? sender, EventArgs e) {
 			startupStopwatch!.Stop();
 			DnSpyEventSource.Log.StartupStop();
 			var sw = startupStopwatch;
@@ -593,8 +594,10 @@ namespace dnSpy.MainApp {
 				exportProvider.GetExportedValue<IDocumentTabService>().OpenEmptyTab();
 
 			var files = appArgs.Filenames.ToArray();
-			if (files.Length > 0)
-				OpenDocumentsHelper.OpenDocuments(exportProvider.GetExportedValue<IDocumentTabService>().DocumentTreeView, appWindow.MainWindow, files, false);
+			if (files.Length > 0) {
+				var mruList = exportProvider.GetExportedValue<AssemblyExplorerMostRecentlyUsedList>();
+				OpenDocumentsHelper.OpenDocuments(exportProvider.GetExportedValue<IDocumentTabService>().DocumentTreeView, appWindow.MainWindow, mruList, files, false);
+			}
 
 			// The files were lazily added to the treeview. Make sure they've been added to the TV
 			// before we process the remaining command line args.

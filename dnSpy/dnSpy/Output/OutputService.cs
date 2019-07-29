@@ -144,17 +144,18 @@ namespace dnSpy.Output {
 			}));
 		}
 
-		void OutputWindowOptionsService_OptionChanged(object sender, OptionChangedEventArgs e) {
+		void OutputWindowOptionsService_OptionChanged(object? sender, OptionChangedEventArgs e) {
 			if (e.OptionId == DefaultTextViewOptions.WordWrapStyleName)
 				OnPropertyChanged(nameof(WordWrap));
 		}
 
-		void OutputBuffers_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e) {
+		void OutputBuffers_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e) {
 			if (SelectedOutputBufferVM is null)
 				SelectedOutputBufferVM = OutputBuffers.FirstOrDefault();
 
 			if (!(e.NewItems is null)) {
-				foreach (OutputBufferVM vm in e.NewItems) {
+				foreach (OutputBufferVM? vm in e.NewItems) {
+					Debug.Assert(!(vm is null));
 					if (vm.Guid == prevSelectedGuid && prevSelectedGuid != Guid.Empty) {
 						SelectedOutputBufferVM = vm;
 						prevSelectedGuid = Guid.Empty;

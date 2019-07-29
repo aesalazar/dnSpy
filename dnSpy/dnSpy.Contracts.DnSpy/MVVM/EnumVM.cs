@@ -19,6 +19,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace dnSpy.Contracts.MVVM {
@@ -45,7 +46,7 @@ namespace dnSpy.Contracts.MVVM {
 		/// <param name="value">Initial value</param>
 		public EnumVM(object value) {
 			this.value = value;
-			name = Enum.GetName(value.GetType(), value);
+			name = Enum.GetName(value.GetType(), value) ?? throw new ArgumentOutOfRangeException(nameof(value));
 		}
 
 		/// <summary>
@@ -76,6 +77,7 @@ namespace dnSpy.Contracts.MVVM {
 		public static EnumVM[] Create(bool sort, Type enumType, params object[] values) {
 			var list = new List<EnumVM>();
 			foreach (var value in enumType.GetEnumValues()) {
+				Debug.Assert(!(value is null));
 				if (values.Any(a => a.Equals(value)))
 					continue;
 				list.Add(new EnumVM(value));

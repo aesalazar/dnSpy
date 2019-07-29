@@ -69,7 +69,7 @@ namespace dnSpy.Contracts.Utilities {
 		/// </summary>
 		/// <param name="s"></param>
 		/// <returns></returns>
-		public static string EscapeMenuItemHeader(string s) => NameUtilities.CleanName(s)!.Replace("_", "__");
+		public static string EscapeMenuItemHeader(string s) => NameUtilities.CleanName(s).Replace("_", "__");
 
 		/// <summary>
 		/// Truncates the string after <paramref name="length"/> characters and adds an elipsis at the end.
@@ -90,8 +90,8 @@ namespace dnSpy.Contracts.Utilities {
 				FocusSelectorInternal(selector);
 		}
 
-		static void selector_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e) {
-			var selector = (Selector)sender;
+		static void selector_IsVisibleChanged(object? sender, DependencyPropertyChangedEventArgs e) {
+			var selector = (Selector)sender!;
 			selector.IsVisibleChanged -= selector_IsVisibleChanged;
 			FocusSelectorInternal(selector);
 		}
@@ -111,8 +111,8 @@ namespace dnSpy.Contracts.Utilities {
 			}
 		}
 
-		static void UIElement_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e) {
-			var ui = (UIElement)sender;
+		static void UIElement_IsVisibleChanged(object? sender, DependencyPropertyChangedEventArgs e) {
+			var ui = (UIElement)sender!;
 			ui.IsVisibleChanged -= UIElement_IsVisibleChanged;
 			ui.Focus();
 		}
@@ -148,14 +148,14 @@ namespace dnSpy.Contracts.Utilities {
 					fwkElem.Loaded += FrameworkElement_Loaded;
 			}
 
-			void UIElement_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e) {
+			void UIElement_IsVisibleChanged(object? sender, DependencyPropertyChangedEventArgs e) {
 				if (sender != element)
 					return;
 				element.IsVisibleChanged -= UIElement_IsVisibleChanged;
 				Focus();
 			}
 
-			void FrameworkElement_Loaded(object sender, RoutedEventArgs e) {
+			void FrameworkElement_Loaded(object? sender, RoutedEventArgs e) {
 				if (sender != element)
 					return;
 				var fwkElem = (FrameworkElement)element;

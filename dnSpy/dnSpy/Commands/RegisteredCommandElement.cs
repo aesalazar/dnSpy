@@ -86,9 +86,7 @@ namespace dnSpy.Commands {
 			}
 
 			public CommandTargetStatus CanExecute(Guid group, int cmdId) {
-				var filter = filterWeakRef.Target as ICommandTargetFilter;
-				var owner = ownerWeakRef.Target as RegisteredCommandElement;
-				if (!(filter is null) && !(owner is null))
+				if (filterWeakRef.Target is ICommandTargetFilter filter && ownerWeakRef.Target is RegisteredCommandElement owner)
 					return owner.CanExecuteNext(filter, group, cmdId);
 				return CommandTargetStatus.NotHandled;
 			}
@@ -99,9 +97,7 @@ namespace dnSpy.Commands {
 			}
 
 			public CommandTargetStatus Execute(Guid group, int cmdId, object? args, ref object? result) {
-				var filter = filterWeakRef.Target as ICommandTargetFilter;
-				var owner = ownerWeakRef.Target as RegisteredCommandElement;
-				if (!(filter is null) && !(owner is null))
+				if (filterWeakRef.Target is ICommandTargetFilter filter && ownerWeakRef.Target is RegisteredCommandElement owner)
 					owner.ExecuteNext(filter, group, cmdId, args, ref result);
 				return CommandTargetStatus.NotHandled;
 			}
@@ -123,11 +119,10 @@ namespace dnSpy.Commands {
 		}
 
 		UIElement? TryGetSourceElement() => weakSourceElement.Target as UIElement;
-		object TryGetTarget() => weakTarget.Target as object;
+		object? TryGetTarget() => weakTarget.Target as object;
 
 		object? TryGetTargetOrUnregister() {
-			var target = TryGetTarget();
-			if (!(target is null))
+			if (TryGetTarget() is object target)
 				return target;
 
 			Unregister();
@@ -160,7 +155,7 @@ namespace dnSpy.Commands {
 		}
 		KeyInput? prevKey;
 
-		void SourceElement_PreviewKeyDown(object sender, KeyEventArgs e) {
+		void SourceElement_PreviewKeyDown(object? sender, KeyEventArgs e) {
 			var target = TryGetTargetOrUnregister();
 			if (target is null)
 				return;
@@ -182,7 +177,7 @@ namespace dnSpy.Commands {
 				e.Handled = true;
 		}
 
-		void SourceElement_PreviewTextInput(object sender, TextCompositionEventArgs e) {
+		void SourceElement_PreviewTextInput(object? sender, TextCompositionEventArgs e) {
 			Debug.Assert(prevKey is null);
 			prevKey = null;
 			var target = TryGetTargetOrUnregister();
@@ -282,8 +277,7 @@ namespace dnSpy.Commands {
 		}
 
 		public void Unregister() {
-			var sourceElement = TryGetSourceElement();
-			if (!(sourceElement is null)) {
+			if (TryGetSourceElement() is UIElement sourceElement) {
 				sourceElement.PreviewKeyDown -= SourceElement_PreviewKeyDown;
 				sourceElement.PreviewTextInput -= SourceElement_PreviewTextInput;
 			}

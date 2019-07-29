@@ -327,7 +327,7 @@ namespace dnSpy.Documents.Tabs {
 		public override void Execute(IMenuItemContext context) {
 			var @ref = GetReference(context, out var documentViewer);
 			if (!(@ref is null))
-				documentViewer!.DocumentTab.FollowReferenceNewTab(@ref);
+				documentViewer!.DocumentTab?.FollowReferenceNewTab(@ref);
 		}
 
 		public override bool IsVisible(IMenuItemContext context) => !(GetReference(context, out var documentViewer) is null);
@@ -339,7 +339,12 @@ namespace dnSpy.Documents.Tabs {
 			documentViewer = context.Find<IDocumentViewer>();
 			if (documentViewer is null)
 				return null;
-			return context.Find<TextReference>();
+			var textRef = context.Find<TextReference>();
+			if (textRef is null)
+				return null;
+			if (textRef.NoFollow)
+				return null;
+			return textRef;
 		}
 
 		public override string? GetInputGestureText(IMenuItemContext context) =>

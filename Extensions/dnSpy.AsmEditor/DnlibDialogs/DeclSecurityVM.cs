@@ -52,7 +52,7 @@ namespace dnSpy.AsmEditor.DnlibDialogs {
 
 	sealed class DeclSecurityVM : ViewModelBase {
 		public ICommand ReinitializeCommand => new RelayCommand(a => Reinitialize());
-		public string FullName => SecurityActionEnumList.SelectedItem!.ToString();
+		public string FullName => SecurityActionEnumList.SelectedItem!.ToString()!;
 
 		public string? V1XMLString {
 			get => v1XMLString;
@@ -98,8 +98,8 @@ namespace dnSpy.AsmEditor.DnlibDialogs {
 			Reinitialize();
 		}
 
-		void SecurityAttributesVM_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e) => HasErrorUpdated();
-		void CustomAttributesVM_PropertyChanged(object sender, PropertyChangedEventArgs e) => HasErrorUpdated();
+		void SecurityAttributesVM_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e) => HasErrorUpdated();
+		void CustomAttributesVM_PropertyChanged(object? sender, PropertyChangedEventArgs e) => HasErrorUpdated();
 
 		void OnDeclSecVerChanged() {
 			OnPropertyChanged(nameof(IsV1));

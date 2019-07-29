@@ -93,18 +93,17 @@ namespace dnSpy.AsmEditor.Hex.Nodes {
 				buffer.Changed += Buffer_Changed;
 			}
 
-			void Buffer_Changed(object sender, HexContentChangedEventArgs e) {
-				var node = (PENode)nodeWeakRef.Target;
-				if (!(node is null))
+			void Buffer_Changed(object? sender, HexContentChangedEventArgs e) {
+				if (nodeWeakRef.Target is PENode node)
 					node.Buffer_Changed(sender, e);
 				else {
-					var buffer = (HexBuffer)sender;
+					var buffer = (HexBuffer)sender!;
 					buffer.Changed -= Buffer_Changed;
 				}
 			}
 		}
 
-		void Buffer_Changed(object sender, HexContentChangedEventArgs e) {
+		void Buffer_Changed(object? sender, HexContentChangedEventArgs e) {
 			// Descendants() shouldn't be used since some of the nodes could have thousands of
 			// children and it's better if the parent can quickly check whether any of its children
 			// need to get notified.

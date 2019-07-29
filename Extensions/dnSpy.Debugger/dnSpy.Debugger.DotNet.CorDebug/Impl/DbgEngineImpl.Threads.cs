@@ -21,8 +21,8 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Threading;
 using dndbg.COM.CorDebug;
 using dndbg.Engine;
@@ -63,7 +63,7 @@ namespace dnSpy.Debugger.DotNet.CorDebug.Impl {
 
 		ThreadProperties GetThreadProperties_CorDebug(DnThread thread, ThreadProperties? oldProperties, bool isCreateThread, bool forceReadName, bool isMainThread) {
 			debuggerThread.VerifyAccess();
-			var appDomain = TryGetEngineAppDomain(thread.AppDomainOrNull)?.AppDomain;
+			var appDomain = TryGetEngineAppDomain(thread.AppDomain)?.AppDomain;
 			ulong id = (uint)thread.VolatileThreadId;
 
 			// If it was created, it could already have a new name so always try to read it
@@ -210,7 +210,7 @@ namespace dnSpy.Debugger.DotNet.CorDebug.Impl {
 			}
 		}
 
-		void DnDebugger_OnThreadAdded(object sender, ThreadDebuggerEventArgs e) {
+		void DnDebugger_OnThreadAdded(object? sender, ThreadDebuggerEventArgs e) {
 			Debug.Assert(!(objectFactory is null));
 			if (e.Added) {
 				bool isMainThread = IsMainThread(e.Thread);
@@ -443,7 +443,7 @@ namespace dnSpy.Debugger.DotNet.CorDebug.Impl {
 
 		internal DnModuleId? TryGetModuleId(CorFrame frame) => dnDebugger.TryGetModuleId(frame.Function?.Module);
 
-		bool TryGetFrame(DbgThread thread, [NotNullWhenTrue] out CorFrame? frame) {
+		bool TryGetFrame(DbgThread thread, [NotNullWhen(true)] out CorFrame? frame) {
 			debuggerThread.VerifyAccess();
 			frame = null;
 			var data = TryGetThreadData(thread);

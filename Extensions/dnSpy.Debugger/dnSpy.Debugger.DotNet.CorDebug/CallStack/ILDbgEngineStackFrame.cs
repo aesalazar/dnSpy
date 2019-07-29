@@ -20,7 +20,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Runtime.CompilerServices;
+using System.Diagnostics.CodeAnalysis;
 using dndbg.Engine;
 using dnSpy.Contracts.Debugger;
 using dnSpy.Contracts.Debugger.CallStack;
@@ -120,7 +120,7 @@ namespace dnSpy.Debugger.DotNet.CorDebug.CallStack {
 			public ILFrameState(ILDbgEngineStackFrame ilFrame) => ILFrame = ilFrame;
 		}
 		public override void OnFrameCreated(DbgStackFrame frame) => frame.GetOrCreateData(() => new ILFrameState(this));
-		internal static bool TryGetEngineStackFrame(DbgStackFrame frame, [NotNullWhenTrue] out ILDbgEngineStackFrame? ilFrame) {
+		internal static bool TryGetEngineStackFrame(DbgStackFrame frame, [NotNullWhen(true)] out ILDbgEngineStackFrame? ilFrame) {
 			if (frame.TryGetData(out ILFrameState? data)) {
 				ilFrame = data.ILFrame;
 				return true;
@@ -130,7 +130,7 @@ namespace dnSpy.Debugger.DotNet.CorDebug.CallStack {
 		}
 
 		internal DmdModule GetReflectionModule() => Module!.GetReflectionModule() ?? throw new InvalidOperationException();
-		internal CorAppDomain GetCorAppDomain() => dnThread.AppDomainOrNull?.CorAppDomain ?? throw new InvalidOperationException();
+		internal CorAppDomain GetCorAppDomain() => dnThread.AppDomain?.CorAppDomain ?? throw new InvalidOperationException();
 
 		internal void GetFrameMethodInfo(out DmdModule? module, out int methodMetadataToken, out IList<DmdType> genericTypeArguments, out IList<DmdType> genericMethodArguments) {
 			engine.VerifyCorDebugThread();

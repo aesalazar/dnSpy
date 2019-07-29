@@ -28,7 +28,6 @@ namespace dnSpy.Analyzer {
 		bool SyntaxHighlight { get; }
 		bool ShowToken { get; }
 		bool SingleClickExpandsChildren { get; }
-		bool UseNewRenderer { get; }
 	}
 
 	class AnalyzerSettings : ViewModelBase, IAnalyzerSettings {
@@ -65,24 +64,12 @@ namespace dnSpy.Analyzer {
 		}
 		bool singleClickExpandsChildren = true;
 
-		public bool UseNewRenderer {
-			get => useNewRenderer;
-			set {
-				if (useNewRenderer != value) {
-					useNewRenderer = value;
-					OnPropertyChanged(nameof(UseNewRenderer));
-				}
-			}
-		}
-		bool useNewRenderer = false;
-
 		public AnalyzerSettings Clone() => CopyTo(new AnalyzerSettings());
 
 		public AnalyzerSettings CopyTo(AnalyzerSettings other) {
 			other.SyntaxHighlight = SyntaxHighlight;
 			other.ShowToken = ShowToken;
 			other.SingleClickExpandsChildren = SingleClickExpandsChildren;
-			other.UseNewRenderer = UseNewRenderer;
 			return other;
 		}
 	}
@@ -101,16 +88,14 @@ namespace dnSpy.Analyzer {
 			SyntaxHighlight = sect.Attribute<bool?>(nameof(SyntaxHighlight)) ?? SyntaxHighlight;
 			ShowToken = sect.Attribute<bool?>(nameof(ShowToken)) ?? ShowToken;
 			SingleClickExpandsChildren = sect.Attribute<bool?>(nameof(SingleClickExpandsChildren)) ?? SingleClickExpandsChildren;
-			UseNewRenderer = sect.Attribute<bool?>(nameof(UseNewRenderer)) ?? UseNewRenderer;
 			PropertyChanged += AnalyzerSettingsImpl_PropertyChanged;
 		}
 
-		void AnalyzerSettingsImpl_PropertyChanged(object sender, PropertyChangedEventArgs e) {
+		void AnalyzerSettingsImpl_PropertyChanged(object? sender, PropertyChangedEventArgs e) {
 			var sect = settingsService.RecreateSection(SETTINGS_GUID);
 			sect.Attribute(nameof(SyntaxHighlight), SyntaxHighlight);
 			sect.Attribute(nameof(ShowToken), ShowToken);
 			sect.Attribute(nameof(SingleClickExpandsChildren), SingleClickExpandsChildren);
-			sect.Attribute(nameof(UseNewRenderer), UseNewRenderer);
 		}
 	}
 }
