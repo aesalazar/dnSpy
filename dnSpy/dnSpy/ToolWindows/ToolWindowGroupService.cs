@@ -21,6 +21,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using dnSpy.Contracts.Controls;
 using dnSpy.Contracts.Tabs;
 using dnSpy.Contracts.ToolWindows;
 using dnSpy.Controls;
@@ -30,6 +31,7 @@ using dnSpy.Tabs;
 namespace dnSpy.ToolWindows {
 	sealed class ToolWindowGroupService : IToolWindowGroupService, IStackedContentChild {
 		readonly ITabGroupService tabGroupService;
+		readonly IWpfCommandService wpfCommandService;
 
 		public event EventHandler<ToolWindowSelectedEventArgs> TabSelectionChanged {
 			add => tabSelectionChanged.Add(value);
@@ -74,8 +76,10 @@ namespace dnSpy.ToolWindows {
 
 		ITabGroup GetTabGroup(IToolWindowGroup g) => tabGroupService.TabGroups.FirstOrDefault(a => a.Tag == g);
 
-		public ToolWindowGroupService(ITabGroupService tabGroupService) {
+		public ToolWindowGroupService(ITabGroupService tabGroupService, IWpfCommandService wpfCommandService) {
 			this.tabGroupService = tabGroupService;
+			this.wpfCommandService = wpfCommandService;
+
 			tabSelectionChanged = new WeakEventList<ToolWindowSelectedEventArgs>();
 			tabGroupSelectionChanged = new WeakEventList<ToolWindowGroupSelectedEventArgs>();
 			toolWindowGroupCollectionChanged = new WeakEventList<ToolWindowGroupCollectionChangedEventArgs>();
@@ -100,7 +104,7 @@ namespace dnSpy.ToolWindows {
 			tabGroupSelectionChanged.Raise(this, new ToolWindowGroupSelectedEventArgs(GetToolWindowGroup(e.Selected), GetToolWindowGroup(e.Unselected)));
 		void TabGroupService_TabGroupCollectionChanged(object? sender, TabGroupCollectionChangedEventArgs e) =>
 			toolWindowGroupCollectionChanged.Raise(this, new ToolWindowGroupCollectionChangedEventArgs(e.Added, GetToolWindowGroup(e.TabGroup)!));
-		public IToolWindowGroup Create() => new ToolWindowGroup(this, tabGroupService.Create());
+		public IToolWindowGroup Create() => new ToolWindowGroup(this, tabGroupService.Create(), wpfCommandService);
 
 		public void Close(IToolWindowGroup group) {
 			if (group is null)
@@ -114,9 +118,9 @@ namespace dnSpy.ToolWindows {
 		public bool CloseAllTabsCanExecute => !(tabGroupService.ActiveTabGroup is null) && tabGroupService.ActiveTabGroup.TabContents.Count() > 1 && tabGroupService.CloseAllTabsCanExecute;
 		public void CloseAllTabs() => tabGroupService.CloseAllTabs();
 		public bool NewHorizontalTabGroupCanExecute => tabGroupService.NewHorizontalTabGroupCanExecute;
-		public void NewHorizontalTabGroup() => tabGroupService.NewHorizontalTabGroup(a => new ToolWindowGroup(this, a));
+		public void NewHorizontalTabGroup() => tabGroupService.NewHorizontalTabGroup(a => new ToolWindowGroup(this, a, wpfCommandService));
 		public bool NewVerticalTabGroupCanExecute => tabGroupService.NewVerticalTabGroupCanExecute;
-		public void NewVerticalTabGroup() => tabGroupService.NewVerticalTabGroup(a => new ToolWindowGroup(this, a));
+		public void NewVerticalTabGroup() => tabGroupService.NewVerticalTabGroup(a => new ToolWindowGroup(this, a, wpfCommandService));
 		public bool MoveToNextTabGroupCanExecute => tabGroupService.MoveToNextTabGroupCanExecute;
 		public void MoveToNextTabGroup() => tabGroupService.MoveToNextTabGroup();
 		public bool MoveToPreviousTabGroupCanExecute => tabGroupService.MoveToPreviousTabGroupCanExecute;

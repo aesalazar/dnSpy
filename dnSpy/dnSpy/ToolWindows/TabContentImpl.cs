@@ -134,10 +134,12 @@ namespace dnSpy.ToolWindows {
 		}
 		ToolWindowGroup? owner;
 
+		readonly IWpfCommandService wpfCommandService;
 		readonly TabElementZoomer elementZoomer;
 
-		public TabContentImpl(ToolWindowGroup owner, ToolWindowContent content) {
-			elementZoomer = new TabElementZoomer();
+		public TabContentImpl(ToolWindowGroup owner, ToolWindowContent content, IWpfCommandService wpfCommandService) {
+			this.wpfCommandService = wpfCommandService;
+			elementZoomer = new TabElementZoomer(wpfCommandService);
 			this.owner = owner;
 			Content = content;
 			AddEvents();

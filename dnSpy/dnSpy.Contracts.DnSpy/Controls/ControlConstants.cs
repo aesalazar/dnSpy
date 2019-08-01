@@ -102,5 +102,24 @@ namespace dnSpy.Contracts.Controls {
 
 		/// <summary>Guid of output control</summary>
 		public static readonly Guid GUID_OUTPUT_CONTROL = new Guid("0DD9693D-DA25-40A0-A9AC-4393D5819969");
+
+		#region TabElementZoomer
+
+		/// <summary>Guid string of Tab control zoomer.</summary>
+		public const string TABELEMENTZOOMER_GUID_STRING = "ABDE0231-6128-4282-AFA8-858E1127E25E";
+
+		/// <summary>Guid of Tab control zoomer.</summary>
+		public static readonly Guid TABELEMENTZOOMER_GUID = new Guid(TABELEMENTZOOMER_GUID_STRING);
+
+		/// <summary>TabElementZoomer zoom increase command name.</summary>
+		public const string TABELEMENTZOOMER_COMMAND_INCREASE = nameof(TABELEMENTZOOMER_COMMAND_INCREASE);
+	
+		/// <summary>TabElementZoomer zoom decrease command name.</summary>
+		public const string TABELEMENTZOOMER_COMMAND_DECREASE = nameof(TABELEMENTZOOMER_COMMAND_DECREASE);
+	
+		/// <summary>TabElementZoomer zoom reset command name.</summary>
+		public const string TABELEMENTZOOMER_COMMAND_RESET = nameof(TABELEMENTZOOMER_COMMAND_RESET);
+
+		#endregion
 	}
 }

@@ -31,16 +31,9 @@ namespace dnSpy.Commands {
 		readonly Lazy<ICommandTargetFilterProvider, ICommandTargetFilterProviderMetadata>[] commandTargetFilterProviders;
 
 		[ImportingConstructor]
-		CommandService(
-			[ImportMany] IEnumerable<Lazy<ICommandInfoProvider
-			, ICommandInfoProviderMetadata>> commandInfoProviders
-			, [ImportMany] IEnumerable<Lazy<ICommandTargetFilterProvider
-			, ICommandTargetFilterProviderMetadata>> commandTargetFilterProviders
-			, ICommandManager commandManager
-		) {
+		CommandService([ImportMany] IEnumerable<Lazy<ICommandInfoProvider, ICommandInfoProviderMetadata>> commandInfoProviders, [ImportMany] IEnumerable<Lazy<ICommandTargetFilterProvider, ICommandTargetFilterProviderMetadata>> commandTargetFilterProviders) {
 			this.commandInfoProviders = commandInfoProviders.OrderBy(a => a.Metadata.Order).ToArray();
 			this.commandTargetFilterProviders = commandTargetFilterProviders.OrderBy(a => a.Metadata.Order).ToArray();
-			CommandManager = commandManager;
 		}
 
 		public IRegisteredCommandElement Register(UIElement sourceElement, object target) {
@@ -74,11 +67,5 @@ namespace dnSpy.Commands {
 			}
 			return null;
 		}
-
-		/// <summary>
-		/// Application instance of <see cref="ICommandManager"/>.
-		/// </summary>
-		public static ICommandManager CommandManager { get; private set; }
-
 	}
 }

@@ -21,11 +21,14 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using dnSpy.Contracts.Controls;
 using dnSpy.Contracts.Tabs;
 using dnSpy.Contracts.ToolWindows;
 
 namespace dnSpy.ToolWindows {
 	sealed class ToolWindowGroup : IToolWindowGroup {
+		readonly IWpfCommandService wpfCommandService;
+
 		public ITabGroup TabGroup { get; }
 		public IToolWindowGroupService ToolWindowGroupService { get; }
 		IEnumerable<TabContentImpl> TabContentImpls => TabGroup.TabContents.Cast<TabContentImpl>();
@@ -41,9 +44,11 @@ namespace dnSpy.ToolWindows {
 			}
 		}
 
-		public ToolWindowGroup(IToolWindowGroupService toolWindowGroupService, ITabGroup tabGroup) {
+		public ToolWindowGroup(IToolWindowGroupService toolWindowGroupService, ITabGroup tabGroup, IWpfCommandService wpfCommandService) {
 			ToolWindowGroupService = toolWindowGroupService;
 			TabGroup = tabGroup;
+			this.wpfCommandService = wpfCommandService;
+
 			TabGroup.Tag = this;
 			TabGroup.TabContentAttached += TabGroup_TabContentAttached;
 		}
@@ -61,7 +66,7 @@ namespace dnSpy.ToolWindows {
 
 		public static ToolWindowGroup? GetToolWindowGroup(ITabGroup? tabGroup) => (ToolWindowGroup?)tabGroup?.Tag;
 		TabContentImpl GetTabContentImpl(ToolWindowContent content) => TabContentImpls.FirstOrDefault(a => a.Content == content);
-		public void Add(ToolWindowContent content) => TabGroup.Add(new TabContentImpl(this, content));
+		public void Add(ToolWindowContent content) => TabGroup.Add(new TabContentImpl(this, content, wpfCommandService));
 
 		public void Close(ToolWindowContent content) {
 			if (content is null)
@@ -93,7 +98,7 @@ namespace dnSpy.ToolWindows {
 			impl.PrepareMove();
 			Close(impl);
 
-			impl = new TabContentImpl(destGroupImpl, content);
+			impl = new TabContentImpl(destGroupImpl, content, wpfCommandService);
 			impl.PrepareMove();
 			destGroupImpl.TabGroup.Add(impl);
 		}

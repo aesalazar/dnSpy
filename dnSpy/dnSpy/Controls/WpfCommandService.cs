@@ -20,15 +20,43 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.Linq;
 using System.Windows;
 using dnSpy.Contracts.Controls;
+using dnSpy.Contracts.DnSpy.Command;
+using dnSpy.Contracts.DnSpy.Controls;
 
 namespace dnSpy.Controls {
 	[Export(typeof(IWpfCommandService))]
 	sealed class WpfCommandService : IWpfCommandService {
 		readonly Dictionary<Guid, WpfCommands> toWpfCommands;
 
-		WpfCommandService() => toWpfCommands = new Dictionary<Guid, WpfCommands>();
+		readonly Dictionary<Guid, IEnumerable<IUserCommandMetadata>> userCommandsMetadata;
+		readonly IDictionary<Guid, IWpfUserCommands> toWpfUserCommands;
+
+		[ImportingConstructor]
+		public WpfCommandService([ImportMany] IEnumerable<Lazy<IUserCommand, IUserCommandMetadata>> userCommands) {
+			toWpfCommands = new Dictionary<Guid, WpfCommands>();
+
+			toWpfUserCommands = new Dictionary<Guid, IWpfUserCommands>();
+			userCommandsMetadata = userCommands
+				.GroupBy(l => l.Metadata.ControlGuid)
+				.ToDictionary(
+					g => Guid.Parse(g.Key)
+					, g => g.Select(l => l.Metadata)
+			);
+		}
+
+		IWpfUserCommands IWpfCommandService.GetUserCommands(Guid guid) => GetUserCommands(guid);
+
+		IWpfUserCommands GetUserCommands(Guid guid) {
+			if (!toWpfUserCommands.TryGetValue(guid, out var c)) {
+				c = new WpfUserCommands(guid, userCommandsMetadata[guid]);
+				toWpfUserCommands.Add(guid, c);
+			}
+
+			return c;
+		}
 
 		public void Add(Guid guid, UIElement elem) {
 			if (elem is null)

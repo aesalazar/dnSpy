@@ -119,9 +119,12 @@ namespace dnSpy.Documents.Tabs {
 		readonly Lazy<IDefaultDocumentTabContentProvider, IDefaultDocumentTabContentProviderMetadata>[] defaultDocumentTabContentProviders;
 		readonly Lazy<IReferenceHandler, IReferenceHandlerMetadata>[] referenceHandlers;
 		readonly TabElementZoomer elementZoomer;
+		readonly IWpfCommandService wpfCommandService;
 
-		public TabContentImpl(DocumentTabService documentTabService, IDocumentTabUIContextLocator documentTabUIContextLocator, Lazy<IReferenceDocumentTabContentProvider, IReferenceDocumentTabContentProviderMetadata>[] referenceDocumentTabContentProviders, Lazy<IDefaultDocumentTabContentProvider, IDefaultDocumentTabContentProviderMetadata>[] defaultDocumentTabContentProviders, Lazy<IReferenceHandler, IReferenceHandlerMetadata>[] referenceHandlers) {
-			elementZoomer = new TabElementZoomer();
+		public TabContentImpl(DocumentTabService documentTabService, IDocumentTabUIContextLocator documentTabUIContextLocator, Lazy<IReferenceDocumentTabContentProvider, IReferenceDocumentTabContentProviderMetadata>[] referenceDocumentTabContentProviders, Lazy<IDefaultDocumentTabContentProvider, IDefaultDocumentTabContentProviderMetadata>[] defaultDocumentTabContentProviders, Lazy<IReferenceHandler, IReferenceHandlerMetadata>[] referenceHandlers, IWpfCommandService wpfCommandService) {
+			this.wpfCommandService = wpfCommandService;
+			elementZoomer = new TabElementZoomer(wpfCommandService);
+
 			tabHistory = new TabHistory();
 			tabHistory.SetCurrent(new NullDocumentTabContent(), false);
 			this.documentTabService = documentTabService;

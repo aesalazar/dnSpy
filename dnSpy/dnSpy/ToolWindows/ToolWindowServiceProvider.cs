@@ -18,6 +18,7 @@
 */
 
 using System.ComponentModel.Composition;
+using dnSpy.Contracts.Controls;
 using dnSpy.Contracts.Tabs;
 using dnSpy.Contracts.ToolWindows;
 
@@ -25,10 +26,14 @@ namespace dnSpy.ToolWindows {
 	[Export(typeof(IToolWindowServiceProvider))]
 	sealed class ToolWindowServiceProvider : IToolWindowServiceProvider {
 		readonly ITabServiceProvider tabServiceProvider;
+		readonly IWpfCommandService wpfCommandService;
 
 		[ImportingConstructor]
-		ToolWindowServiceProvider(ITabServiceProvider tabServiceProvider) => this.tabServiceProvider = tabServiceProvider;
+		ToolWindowServiceProvider(ITabServiceProvider tabServiceProvider, IWpfCommandService wpfCommandService) {
+			this.tabServiceProvider = tabServiceProvider;
+			this.wpfCommandService = wpfCommandService;
+		}
 
-		public IToolWindowService Create() => new ToolWindowService(tabServiceProvider.Create());
+		public IToolWindowService Create() => new ToolWindowService(tabServiceProvider.Create(), wpfCommandService);
 	}
 }

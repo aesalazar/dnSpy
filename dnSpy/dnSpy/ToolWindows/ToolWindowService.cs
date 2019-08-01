@@ -21,6 +21,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Windows;
+using dnSpy.Contracts.Controls;
 using dnSpy.Contracts.Menus;
 using dnSpy.Contracts.Tabs;
 using dnSpy.Contracts.ToolWindows;
@@ -28,15 +29,19 @@ using dnSpy.Contracts.ToolWindows;
 namespace dnSpy.ToolWindows {
 	sealed class ToolWindowService : IToolWindowService {
 		readonly ITabService tabService;
+		readonly IWpfCommandService wpfCommandService;
 
-		public ToolWindowService(ITabService tabService) => this.tabService = tabService;
+		public ToolWindowService(ITabService tabService, IWpfCommandService wpfCommandService) {
+			this.tabService = tabService;
+			this.wpfCommandService = wpfCommandService;
+		}
 
 		public IToolWindowGroupService Create(ToolWindowGroupServiceOptions options) {
 			var newOptions = Convert(options);
 			var ctxMenuHelper = new InitializeContextMenuHelper(newOptions.TabGroupGuid);
 			if (newOptions.TabGroupGuid != Guid.Empty)
 				newOptions.InitializeContextMenu = ctxMenuHelper.InitializeContextMenu;
-			var mgr = new ToolWindowGroupService(tabService.Create(newOptions));
+			var mgr = new ToolWindowGroupService(tabService.Create(newOptions), wpfCommandService);
 			ctxMenuHelper.ToolWindowGroupService = mgr;
 			return mgr;
 		}

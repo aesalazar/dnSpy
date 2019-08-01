@@ -19,12 +19,20 @@
 
 using System;
 using System.Windows;
+using dnSpy.Contracts.DnSpy.Controls;
 
 namespace dnSpy.Contracts.Controls {
 	/// <summary>
 	/// WPF command service
 	/// </summary>
 	public interface IWpfCommandService {
+
+		/// <summary>
+		/// Gets a <see cref="IWpfUserCommands"/> for the control GUID.
+		/// </summary>
+		/// <param name="guid">Guid, eg. <see cref="ControlConstants.GUID_MAINWINDOW"/></param>
+		IWpfUserCommands GetUserCommands(Guid guid);
+
 		/// <summary>
 		/// Adds an element. The element is stored in a <see cref="WeakReference"/>
 		/// </summary>
